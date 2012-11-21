@@ -92,6 +92,7 @@ module Rackstash
     def flush_and_pop_buffer()
       if event = logstash_event
         logger.send(Rackstash.log_level, event)
+        logger.flush if logger.respond_to(:flush)
       end
 
       pop_buffer
@@ -112,6 +113,8 @@ module Rackstash
     def pop_buffer
       if @buffer[Thread.current]
         unless @buffer[Thread.current].pop
+          # We need to delete the whole array to prevent a memory leak
+          # from piling threads
           @buffer.delete(Thread.current)
         end
       end
