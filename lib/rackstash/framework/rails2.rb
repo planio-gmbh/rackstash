@@ -22,6 +22,12 @@ module Rackstash
           # to add a log scope which captures all log lines of the request
           ActionController::Dispatcher.middleware.insert(0, Rackstash::LogMiddleware)
         end
+
+        if Rails.configuration.frameworks.include?(:active_record)
+          # The ANSI color codes in the ActiveRecord logs don't help much in
+          # plain JSON
+          ActiveRecord::Base.colorize_logging = false
+        end
       end
     end
   end
