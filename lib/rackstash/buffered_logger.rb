@@ -33,7 +33,9 @@ module Rackstash
       message = (message || (block && block.call) || progname).to_s
 
       if buffering?
-        buffer[:messages] << {:severity => severity, :message => message.to_s}
+        # remove any leading newlines which would mess up our log
+        message.sub!(/^[\n\r]+/, '')
+        buffer[:messages] << {:severity => severity, :message => message}
         message
       else
         event_message = "[#{Severity::Severities[severity]}] ".rjust(10)
