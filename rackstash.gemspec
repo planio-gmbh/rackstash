@@ -7,9 +7,9 @@ Gem::Specification.new do |gem|
   gem.name          = "rackstash"
   gem.version       = Rackstash::VERSION
   gem.authors       = ["Holger Just"]
-  gem.email         = ["hjust@meine-er.de"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.email         = ["holger@plan.io"]
+  gem.description   = %q{Making Rack and Rails logs useful}
+  gem.summary       = %q{Making Rack and Rails logs useful}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
