@@ -43,8 +43,18 @@ you want to enable Rackstash output, add a simple
 require 'rackstash'
 ```
 
-Additionally, you can configure it there by setting one or more of the
-following configuration settings in the environment file
+If you use `Bundler.require` during your Rails initialization, you can skip
+the above step.
+
+Note though that is is **not sufficient** to require Rackstash
+in an initializer (i.e. one of the files in `config/initializers`) as these
+files are evaluated too late during Rails initialization for Rackstash to
+take over all of the Rails logging. You have to require it in either
+`config/environment.rb` or one or more of
+`config/environments/<environment name>.rb`.
+
+Additionally, you can configure Rackstash by setting one or more of the
+following configuration settings in the respective environment file.
 
 ```ruby
 # The source attribute of all Logstash events
