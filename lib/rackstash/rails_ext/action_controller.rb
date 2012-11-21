@@ -79,7 +79,9 @@ module Rackstash
         if logger && logger.respond_to?(:fields)
           rackstash_fields ||= {}
           logger.fields.reverse_merge!(rackstash_fields)
-          logger.fields.merge!(Rackstash.request_fields(request, filter_parameters(params)))
+
+          request_fields = Rackstash.request_fields(request, filter_parameters(params))
+          logger.fields.merge!(request_fields) if request_fields
         end
       end
 
