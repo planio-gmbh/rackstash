@@ -91,8 +91,15 @@ config.rackstash.tags = ['ruby', 'rails2']
 
 # Contributing
 
+[![Build Status](https://secure.travis-ci.org/planio-gmbh/rackstash.png?branch=master)](https://travis-ci.org/planio-gmbh/rackstash)
+
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+# License
+
+MIT. Code extracted from [Planio](http://plan.io).
+Copyright (c) 2012 Holger Just, Planio GmbH
