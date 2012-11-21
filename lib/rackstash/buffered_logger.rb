@@ -92,7 +92,7 @@ module Rackstash
     def flush_and_pop_buffer()
       if event = logstash_event
         logger.send(Rackstash.log_level, event)
-        logger.flush if logger.respond_to(:flush)
+        logger.flush if logger.respond_to?(:flush)
       end
 
       pop_buffer
