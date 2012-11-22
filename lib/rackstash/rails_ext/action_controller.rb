@@ -67,6 +67,7 @@ module Rackstash
           response.headers["X-Runtime"] = "%.0f" % ms
 
           rackstash_fields[:duration] = ms.round(2)
+          rackstash_fields[:location] = response.location if response.location
         else
           perform_action_without_benchmark
         end
