@@ -37,9 +37,7 @@ module Rackstash
         buffer[:messages] << line
         message
       else
-        fields = { :log_id => uuid, :pid => Process.pid }
-
-        json = logstash_event([line], fields)
+        json = logstash_event([line], default_fields)
         logger.add(severity, json)
       end
     end
@@ -69,7 +67,7 @@ module Rackstash
     def push_buffer
       child_buffer = {
         :messages => [],
-        :fields => { :log_id => uuid, :pid => Process.pid }
+        :fields => default_fields
       }
 
       buffer_stack ||= []
@@ -98,6 +96,10 @@ module Rackstash
     end
 
   protected
+    def default_fields
+      { :log_id => uuid, :pid => Process.pid }
+    end
+
     def buffer
       buffer_stack && buffer_stack.last
     end
