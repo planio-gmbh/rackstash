@@ -16,7 +16,7 @@ module Rackstash
   mattr_accessor :log_level
   self.log_level = :info
 
-  # Custom fields that will be deep merged with the log object when we
+  # Custom fields that will be merged with the log object when we
   # capture a request.
   #
   # Currently supported formats are:
@@ -25,12 +25,28 @@ module Rackstash
   #
   mattr_writer :request_fields
   self.request_fields = nil
-
   def self.request_fields(controller)
     if @@request_fields.respond_to?(:to_proc)
       controller.instance_eval(&@@request_fields)
     else
       @@request_fields
+    end
+  end
+
+  # Custom fields that will be merged with every log object, be it a captured
+  # request or not.
+  #
+  # Currently supported formats are:
+  #  - Hash
+  #  - Any object that responds to to_proc and returns a hash
+  #
+  mattr_writer :fields
+  self.fields = nil
+  def self.fields
+    if @@fields.respond_to?(:to_proc)
+      @@fields.to_proc.call
+    else
+      @@fields
     end
   end
 

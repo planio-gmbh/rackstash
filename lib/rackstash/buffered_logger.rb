@@ -32,23 +32,15 @@ module Rackstash
       return if level > severity
       message = (message || (block && block.call) || progname).to_s
 
+      line = {:severity => severity, :message => message}
       if buffering?
-        # remove any leading newlines which would mess up our log
-        message.sub!(/^[\n\r]+/, '')
-        buffer[:messages] << {:severity => severity, :message => message}
+        buffer[:messages] << line
         message
       else
-        event_message = "[#{Severity::Severities[severity]}] ".rjust(10)
-        event_message << message
+        fields = { :log_id => uuid, :pid => Process.pid }
 
-        event = LogStash::Event.new(
-          "@message" => event_message,
-          "@fields" => { :log_id => uuid, :pid => Process.pid },
-          "@tags" => Rackstash.tags,
-          "@source" => Rackstash.source
-        )
-
-        logger.add(severity, event.to_json)
+        json = logstash_event([line], fields)
+        logger.add(severity, json)
       end
     end
 
@@ -80,20 +72,21 @@ module Rackstash
         :fields => { :log_id => uuid, :pid => Process.pid }
       }
 
-      @buffer[Thread.current] ||= []
-      if parent_buffer = @buffer[Thread.current].last
+      buffer_stack ||= []
+      if parent_buffer = buffer
         parent_buffer[:fields][:child_log_ids] ||= []
         parent_buffer[:fields][:child_log_ids] << child_buffer[:fields][:log_id]
         child_buffer[:fields][:parent_log_id] = parent_buffer[:fields][:log_id]
       end
 
-      @buffer[Thread.current] << child_buffer
+      buffer_stack << child_buffer
       nil
     end
 
-    def flush_and_pop_buffer()
-      if event = logstash_event
-        logger.send(Rackstash.log_level, event)
+    def flush_and_pop_buffer
+      if buffering?
+        json = logstash_event(buffer[:messages], buffer[:fields])
+        logger.send(Rackstash.log_level, json)
         logger.flush if logger.respond_to?(:flush)
       end
 
@@ -104,23 +97,29 @@ module Rackstash
       !!buffer
     end
 
-    protected
+  protected
     def buffer
-      @buffer[Thread.current] && @buffer[Thread.current].last
+      buffer_stack && buffer_stack.last
+    end
+
+    def buffer_stack
+      @buffer[Thread.current.object_id]
     end
 
     # This method removes the top-most buffer.
     # It does not flush the buffer in any way. Use +flush_and_pop_buffer+
     # for that.
     def pop_buffer
-      if @buffer[Thread.current]
-        unless @buffer[Thread.current].pop
+      poped = nil
+
+      if buffer_stack
+          poped = buffer_stack.pop
           # We need to delete the whole array to prevent a memory leak
           # from piling threads
-          @buffer.delete(Thread.current)
+          @buffer.delete(Thread.current.object_id) unless buffer_stack.count > 0
         end
       end
-      nil
+      poped
     end
 
     # uuid generates a v4 random UUID (Universally Unique IDentifier).
@@ -146,18 +145,25 @@ module Rackstash
       end
     end
 
-    def logstash_event
+    def logstash_event(logs=[], fields={})
       return unless buffer = self.buffer
 
       message = ""
-      buffer[:messages].each do |line|
-        message << "[#{Severity::Severities[line[:severity]]}] ".rjust(10)
-        message << (line[:message][-1] == ?\n ? line[:message] : "#{line[:message]}\n")
+      logs.each do |line|
+        # make sure we have a trailing newline
+        msg = (line[:message][-1] == ?\n ? line[:message] : "#{line[:message]}\n")
+        # remove any leading newlines
+        msg = msg.sub!(/^[\n\r]+/, '')
+
+        message << "[#{Severity::Severities[line[:severity]]}] ".rjust(10) + msg
       end
+
+      custom_fields = Rackstash.fields
+      fields = fields.merge(custom_fields) if custom_fields
 
       event = LogStash::Event.new(
         "@message" => message,
-        "@fields" => buffer[:fields],
+        "@fields" => fields,
         "@tags" => Rackstash.tags,
         "@source" => Rackstash.source
       )

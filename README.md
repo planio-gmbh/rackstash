@@ -75,6 +75,18 @@ config.rackstash.request_fields = proc do
   }
 end
 
+# Additional fields that are to be included into every emitted log, both
+# buffered and not. You can use this to add global state information to the
+# log, e.g. from the current thread or from the current environment.
+# Similar to the request_fields, this can be either a static Hash or an
+# object which responds to to_proc and returns a Hash there.
+
+config.rackstash.fields = proc do
+  {
+    :thread_id => Thread.current.object_id
+  }
+end
+
 # Buffered logs events are emitted with this log level. If the logger is
 # not buffering, it just passes the original log level through.
 # Note that the underlying logger should log events with at least this log
