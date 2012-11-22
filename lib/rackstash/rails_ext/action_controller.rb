@@ -80,7 +80,7 @@ module Rackstash
           rackstash_fields ||= {}
           logger.fields.reverse_merge!(rackstash_fields)
 
-          request_fields = Rackstash.request_fields(request, filter_parameters(params))
+          request_fields = Rackstash.request_fields(self)
           logger.fields.merge!(request_fields) if request_fields
         end
       end

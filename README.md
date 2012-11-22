@@ -63,12 +63,15 @@ config.rackstash.source = "http://rails.example.com"
 
 # Additional fields which are included into each log event that
 # originates from a captured request.
-# Can either be a hash or an object which responds to call and returns a
-# hash.
-config.rackstash.request_fields = proc do |request, params|
+# Can either be a Hash or an object which responds to to_proc which
+# subsequently returns a Hash. If it is the latter, the proc will be exceuted
+# similar to an after filter in every request of the controller and thus has
+# access to the controller state after the request was handled.
+config.rackstash.request_fields = proc do
   {
     :host => request.host,
-    :source_ip => request.headers['X-Forwarded-For']
+    :source_ip => request.headers['X-Forwarded-For'],
+    :content-length => response.headers['Content-Length']
   }
 end
 

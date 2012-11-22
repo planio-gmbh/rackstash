@@ -21,14 +21,14 @@ module Rackstash
   #
   # Currently supported formats are:
   #  - Hash
-  #  - Any object that responds to call and returns a hash
+  #  - Any object that responds to to_proc and returns a hash
   #
   mattr_writer :request_fields
   self.request_fields = nil
 
-  def self.request_fields(request, params)
-    if @@request_fields.respond_to?(:call)
-      @@request_fields.call(request, params)
+  def self.request_fields(controller)
+    if @@request_fields.respond_to?(:to_proc)
+      controller.instance_eval(&@@request_fields)
     else
       @@request_fields
     end
