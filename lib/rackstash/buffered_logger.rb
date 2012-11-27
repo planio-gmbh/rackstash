@@ -115,11 +115,10 @@ module Rackstash
       poped = nil
 
       if buffer_stack
-          poped = buffer_stack.pop
-          # We need to delete the whole array to prevent a memory leak
-          # from piling threads
-          @buffer.delete(Thread.current.object_id) unless buffer_stack.count > 0
-        end
+        poped = buffer_stack.pop
+        # We need to delete the whole array to prevent a memory leak
+        # from piling threads
+        @buffer.delete(Thread.current.object_id) unless buffer_stack.any?
       end
       poped
     end
