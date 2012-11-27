@@ -5,6 +5,9 @@ Rails::Initializer.class_eval{ include Rackstash::RailsExt::Initializer }
 module Rackstash
   module Framework
     module Rails2
+      # This method MUST be called after Rails::Initializer#initialize_logger
+      # but before Rails::Initializer#initialize_framework_logging
+      # The Rackstash::RailsExt::Initializer module takes care of that.
       def setup(config={})
         super
 
