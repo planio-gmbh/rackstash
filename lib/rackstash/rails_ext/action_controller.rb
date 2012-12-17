@@ -77,7 +77,7 @@ module Rackstash
         rackstash_fields[:error_message] = exception.message
         raise
       ensure
-        if logger && logger.respond_to?(:fields)
+        if logger && logger.respond_to?(:fields) && logger.fields
           rackstash_fields ||= {}
           logger.fields.reverse_merge!(rackstash_fields)
 
