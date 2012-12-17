@@ -70,14 +70,14 @@ module Rackstash
         :fields => default_fields
       }
 
-      buffer_stack ||= []
+      self.buffer_stack ||= []
       if parent_buffer = buffer
         parent_buffer[:fields][:child_log_ids] ||= []
         parent_buffer[:fields][:child_log_ids] << child_buffer[:fields][:log_id]
         child_buffer[:fields][:parent_log_id] = parent_buffer[:fields][:log_id]
       end
 
-      buffer_stack << child_buffer
+      self.buffer_stack << child_buffer
       nil
     end
 
@@ -106,6 +106,10 @@ module Rackstash
 
     def buffer_stack
       @buffer[Thread.current.object_id]
+    end
+
+    def buffer_stack=(stack)
+      @buffer[Thread.current.object_id] = stack
     end
 
     # This method removes the top-most buffer.
