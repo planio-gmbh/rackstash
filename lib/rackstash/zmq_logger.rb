@@ -40,13 +40,13 @@ module Rackstash
 
     Severities.each do |severity|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{severity.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
-          add(#{severity}, message, progname, &block)                    #   add(DEBUG, message, progname, &block)
-        end                                                              # end
-                                                                         #
-        def #{severity.downcase}?                                        # def debug?
-          #{severity} >= level                                           #   DEBUG >= level
-        end                                                              # end
+        def #{severity.to_s.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
+          add(#{severity}, message, progname, &block)                         #   add(DEBUG, message, progname, &block)
+        end                                                                   # end
+                                                                              #
+        def #{severity.to_s.downcase}?                                        # def debug?
+          #{severity} >= level                                                #   DEBUG >= level
+        end                                                                   # end
       EOT
     end
 
