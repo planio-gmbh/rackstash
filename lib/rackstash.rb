@@ -71,6 +71,18 @@ module Rackstash
     end
   end
 
+  def self.zmq_logger(log_level, zmq_config={})
+    require 'rackstash/zmq_logger'
+
+    socket_type = ZMQ.const_get(zmq_config[:socket_type] || "PUB")
+    socket_options = (zmq_config[:socket_options] || {}).inject({}) do |opts, (k, v)|
+      opts[ZMQ.const_get(k)] = v
+      opts
+    end
+
+    Rackstash::ZmqLogger.new(zmq_config[:address], log_level, socket_type, socket_options)
+  end
+
   require "rackstash/framework/base"
   require "rackstash/framework/#{framework}"
   extend Rackstash::Framework::Base
