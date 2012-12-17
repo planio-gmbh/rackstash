@@ -151,16 +151,14 @@ module Rackstash
     end
 
     def logstash_event(logs=[], fields={})
-      return unless buffer = self.buffer
-
       message = ""
       logs.each do |line|
         # make sure we have a trailing newline
         msg = (line[:message][-1] == ?\n ? line[:message] : "#{line[:message]}\n")
         # remove any leading newlines
-        msg = msg.sub!(/^[\n\r]+/, '')
+        msg = msg.sub(/^[\n\r]+/, '')
 
-        message << "[#{Severity::Severities[line[:severity]]}] ".rjust(10) + msg
+        message << ("[#{Severity::Severities[line[:severity]]}] ".rjust(10) + msg)
       end
 
       custom_fields = Rackstash.fields
