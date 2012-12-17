@@ -25,7 +25,7 @@ module Rackstash
         :status => status
       }
 
-      Rackstash.logger.fields.reverse_merge!(fields)
+      Rackstash.logger.fields.reverse_merge!(fields) if Rackstash.logger.fields
     end
   end
 end
