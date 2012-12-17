@@ -11,7 +11,7 @@ module Rackstash
       def setup(config={})
         super
 
-        if config[:zmq]
+        if config[:zmq] && config[:zmq][:enabled]
           logger = zmq_logger(Rails.configuration.log_level, config[:zmq])
         else
           logger = RAILS_DEFAULT_LOGGER
