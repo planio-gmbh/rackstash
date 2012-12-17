@@ -1,5 +1,6 @@
 require 'action_pack'
 
+require 'rackstash/log_severity'
 require 'rackstash/buffered_logger'
 require 'rackstash/log_middleware'
 require 'rackstash/log_scope'

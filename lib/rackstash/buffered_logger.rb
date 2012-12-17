@@ -3,15 +3,7 @@ require 'securerandom'
 module Rackstash
   class BufferedLogger
     extend Forwardable
-
-    module Severity
-      Severities = [:DEBUG, :INFO, :WARN, :ERROR, :FATAL, :UNKNOWN]
-
-      Severities.each_with_index do |s,i|
-        const_set(s, i)
-      end
-    end
-    include Severity
+    include Rackstash::LogSeverity
 
     def initialize(logger)
       @logger = logger
@@ -42,15 +34,15 @@ module Rackstash
       end
     end
 
-    for severity in Severity.constants
+    Severities.each do |severity|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{severity.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
-          add(#{severity}, message, progname, &block)                    #   add(DEBUG, message, progname, &block)
-        end                                                              # end
-                                                                         #
-        def #{severity.downcase}?                                        # def debug?
-          #{severity} >= level                                           #   DEBUG >= level
-        end                                                              # end
+        def #{severity.to_s.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
+          add(#{severity}, message, progname, &block)                         #   add(DEBUG, message, progname, &block)
+        end                                                                   # end
+                                                                              #
+        def #{severity.to_s.downcase}?                                        # def debug?
+          #{severity} >= level                                                #   DEBUG >= level
+        end                                                                   # end
       EOT
     end
 
@@ -158,7 +150,7 @@ module Rackstash
         # remove any leading newlines
         msg = msg.sub(/^[\n\r]+/, '')
 
-        message << ("[#{Severity::Severities[line[:severity]]}] ".rjust(10) + msg)
+        message << ("[#{Severities[line[:severity]]}] ".rjust(10) + msg)
       end
 
       custom_fields = Rackstash.fields
