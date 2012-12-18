@@ -11,14 +11,8 @@ module Rackstash
       def setup(config={})
         super
 
-        if config[:zmq] && config[:zmq][:enabled]
-          logger = zmq_logger(Rails.configuration.log_level, config[:zmq])
-        else
-          logger = RAILS_DEFAULT_LOGGER
-        end
-
-        unless logger.is_a?(Rackstash::BufferedLogger)
-          rackstash_logger = Rackstash::BufferedLogger.new(logger)
+        unless Rails.logger.is_a?(Rackstash::BufferedLogger)
+          rackstash_logger = Rackstash::BufferedLogger.new(Rails.logger)
           silence_warnings { Object.const_set "RAILS_DEFAULT_LOGGER", rackstash_logger }
           Rackstash.logger = rackstash_logger
         end
