@@ -15,7 +15,7 @@ module Rackstash
     def initialize(address, level=DEBUG, zmq_socket_type=ZMQ::PUB, zmq_options={})
       @level = level
 
-      @context = ZMQ::Context.new
+      @context = ZMQ::Context.new(1)
       @socket = @context.socket(zmq_socket_type)
       zmq_options.each do |k,v|
         @socket.setsockopt(k, v)
