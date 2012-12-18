@@ -21,6 +21,8 @@ module Rackstash
         @socket.setsockopt(k, v)
       end
       @socket.connect("tcp://#{address}")
+
+      at_exit{ self.close }
     end
 
     def zmq_setsockopt(key, value)
@@ -60,8 +62,8 @@ module Rackstash
     end
 
     def close
-      @context.close
       @socket.close
+      @context.close
     end
 
     ##
