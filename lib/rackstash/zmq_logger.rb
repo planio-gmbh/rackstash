@@ -16,7 +16,7 @@ module Rackstash
       @level = level
 
       @context = ZMQ::Context.new
-      @socket = @context.socket(ZMQ::PUSH)
+      @socket = @context.socket(zmq_socket_type)
       zmq_options.each do |k,v|
         @socket.setsockopt(k, v)
       end
