@@ -3,6 +3,7 @@ module Rackstash
     module Base
       def setup(config={})
         Rackstash.request_fields = config[:request_fields]
+        Rackstash.fields = config[:fields]
         Rackstash.source = config[:source]
         Rackstash.log_level = config[:log_level] || :info
         Rackstash.tags = config[:tags] || []
