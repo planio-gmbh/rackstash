@@ -15,12 +15,9 @@ module Rackstash
     def initialize(address, level=DEBUG, zmq_socket_type=ZMQ::PUB, zmq_options={})
       @level = level
 
-      @context = ZMQ::Context.new(1)
-      @socket = @context.socket(zmq_socket_type)
-      zmq_options.each do |k,v|
-        @socket.setsockopt(k, v)
-      end
-      @socket.connect("tcp://#{address}")
+      @zmq_address = address
+      @zmq_socket_type = zmq_socket_type
+      @zmq_options = zmq_options
 
       at_exit{ self.close }
     end
@@ -37,6 +34,7 @@ module Rackstash
       return if level > severity
       message = (message || (block && block.call) || progname).to_s
 
+      zmq_connect unless @socket
       @socket.send(message, ZMQ::NOBLOCK)
     end
 
@@ -62,8 +60,18 @@ module Rackstash
     end
 
     def close
-      @socket.close
-      @context.close
+      if @socket
+        @socket.close
+        @socket = nil
+      end
+      if @context
+        @context.close
+        @context = nil
+      end
+    end
+
+    def zmq_reconnect
+      self.close
     end
 
     ##
@@ -84,6 +92,16 @@ module Rackstash
       else
         yield self
       end
+    end
+
+    protected
+    def zmq_connect
+      @context = ZMQ::Context.new(1)
+      @socket = @context.socket(@zmq_socket_type)
+      @zmq_options.each do |k,v|
+        @socket.setsockopt(k, v)
+      end
+      @socket.connect("tcp://#{@zmq_address}")
     end
   end
 end
