@@ -14,13 +14,14 @@ module Rackstash
 
       def initialize_logger_with_rackstash
         zmq_config = configuration.rackstash.zmq
-        if !Rails.logger && !configuration.logger && zmq_config && zmq_config[:enabled]
+
+        if !Rails.logger && !configuration.logger && zmq_config.enabled
           require 'rackstash/zmq_logger'
 
           log_level = Rackstash::LogSeverity.const_get(configuration.log_level.to_s.upcase)
-          socket_address = zmq_config[:address] || "127.0.0.1:5555"
-          socket_type = ZMQ.const_get(zmq_config[:socket_type] || "PUB")
-          socket_options = (zmq_config[:socket_options] || {}).inject({}) do |opts, (k, v)|
+          socket_address = zmq_config.address || "127.0.0.1:5555"
+          socket_type = ZMQ.const_get((zmq_config.socket_type || "PUB").to_s.upcase)
+          socket_options = (zmq_config.socket_options || {}).inject({}) do |opts, (k, v)|
             opts[ZMQ.const_get(k)] = v
             opts
           end

@@ -38,6 +38,11 @@ end
 
 Rails::Configuration.class_eval do
   def rackstash
-    @rackstash ||= Rails::OrderedOptions.new
+    @rackstash ||= begin
+      rackstash = Rails::OrderedOptions.new
+      rackstash.zmq = Rails::OrderedOptions.new
+
+      rackstash
+    end
   end
 end
