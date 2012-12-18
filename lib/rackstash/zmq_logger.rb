@@ -17,10 +17,10 @@ module Rackstash
 
       @context = ZMQ::Context.new
       @socket = @context.socket(ZMQ::PUSH)
-      @socket.connect("tcp://#{address}")
       zmq_options.each do |k,v|
         @socket.setsockopt(k, v)
       end
+      @socket.connect("tcp://#{address}")
     end
 
     def zmq_setsockopt(key, value)
