@@ -23,19 +23,20 @@ module Rackstash
     end
 
     def zmq_setsockopt(key, value)
-      @socket.setsockopt(key, value) if @socket
+      @zmq_options[key] = value
+      socket.setsockopt(key, value) if socket
     end
 
     def zmq_getsockopt(key, value)
-      @socket.setsockopt(key, value) if @socket
+      socket.setsockopt(key, value) if socket
     end
 
     def add(severity, message = nil, progname = nil, &block)
       return if level > severity
       message = (message || (block && block.call) || progname).to_s
 
-      zmq_connect unless @socket
-      @socket.send(message, ZMQ::NOBLOCK)
+      zmq_connect unless socket
+      socket.send(message, ZMQ::NOBLOCK)
     end
 
     Severities.each do |severity|
@@ -60,23 +61,9 @@ module Rackstash
     end
 
     def close
-      if @socket
-        @socket.close
-        @socket = nil
-      end
-      if @context
-        @context.close
-        @context = nil
-      end
-    end
-
-    def zmq_reconnect(close_before_reconnect=true)
-      if close_before_reconnect
-        self.close
-      else
-        @socket = nil
-        @context = nil
-      end
+      socket.close if socket
+      context.close if context
+      nil
     end
 
     ##
@@ -101,12 +88,33 @@ module Rackstash
 
     protected
     def zmq_connect
-      @context = ZMQ::Context.new(1)
-      @socket = @context.socket(@zmq_socket_type)
-      @zmq_options.each do |k,v|
-        @socket.setsockopt(k, v)
+      Thread.current[socket_thread_id] ||= begin
+        context = ZMQ::Context.new(1)
+        socket = context.socket(@zmq_socket_type)
+        @zmq_options.each do |k,v|
+          socket.setsockopt(k, v)
+        end
+        socket.connect("tcp://#{@zmq_address}")
+
+        {
+          :socket => socket,
+          :context => context
+        }
       end
-      @socket.connect("tcp://#{@zmq_address}")
+    end
+
+    def socket
+      id = socket_thread_id
+      Thread.current[id][:socket] if Thread.current[id]
+    end
+
+    def context
+      id = socket_thread_id
+      Thread.current[id][:context] if Thread.current[id]
+    end
+
+    def socket_thread_id
+      :"rackstash_zmq_logger_#{Process.pid}"
     end
   end
 end
