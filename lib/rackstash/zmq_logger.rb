@@ -23,11 +23,11 @@ module Rackstash
     end
 
     def zmq_setsockopt(key, value)
-      @socket.setsockopt(k, v)
+      @socket.setsockopt(key, value) if @socket
     end
 
     def zmq_getsockopt(key, value)
-      @socket.setsockopt(k, v)
+      @socket.setsockopt(key, value) if @socket
     end
 
     def add(severity, message = nil, progname = nil, &block)
