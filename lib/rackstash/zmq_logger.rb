@@ -70,8 +70,13 @@ module Rackstash
       end
     end
 
-    def zmq_reconnect
-      self.close
+    def zmq_reconnect(close_before_reconnect=true)
+      if close_before_reconnect
+        self.close
+      else
+        @socket = nil
+        @context = nil
+      end
     end
 
     ##
