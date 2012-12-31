@@ -7,7 +7,7 @@ describe Rackstash::ZmqLogger do
     context = ZMQ::Context.new(1)
     server = context.socket(ZMQ::SUB)
     server.bind("tcp://127.0.0.1:32378")
-    server.setsockopt(ZMQ::SUBSCRIBE, "")
+    assert server.setsockopt(ZMQ::SUBSCRIBE, "")
 
     yield server
   ensure
@@ -22,7 +22,7 @@ describe Rackstash::ZmqLogger do
         return socket.recv
       end
     end
-    raise "Timeout: Couldn't read from ZMQ socket"
+    flunk "Timeout: Couldn't read from ZMQ socket"
   end
 
   before do
