@@ -1,0 +1,9 @@
+source 'https://rubygems.org'
+
+gemspec :path => "../..", :name => 'rackstash'
+
+gem "rack", "~> 1.4.1"
+
+group :test do
+  gem "rake"
+end

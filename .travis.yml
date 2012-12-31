@@ -3,5 +3,6 @@ rvm:
   - 1.9.3
   - 1.8.7
 gemfile:
+  - test/gemfiles/Gemfile.rack
   - test/gemfiles/Gemfile.rails_2.3
   - test/gemfiles/Gemfile.rails_3.2
