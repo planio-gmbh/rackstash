@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gemspec :path => "../..", :name => 'rackstash'
 
 gem "rack", "~> 1.4.1"
+gem "zmq"
 
 group :test do
   gem "rake"
