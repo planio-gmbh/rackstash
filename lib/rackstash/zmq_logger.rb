@@ -1,4 +1,5 @@
 require 'zmq'
+require 'rackstash/log_severity'
 
 module Rackstash
   class ZmqLogger
@@ -69,7 +70,14 @@ module Rackstash
     ##
     # :singleton-method:
     # Set to false to disable the silencer
-    cattr_accessor :silencer
+    if respond_to?(:cattr_accessor)
+      cattr_accessor :silencer
+    else
+      def self.silencer; @@silencer; end
+      def self.silencer=(value) @@silencer=value; end
+      def silencer; @@silencer; end
+      def silencer=(value) @@silencer=value; end
+    end
     self.silencer = true
 
     # Silences the logger for the duration of the block.
