@@ -47,7 +47,7 @@ module Rackstash
             log_message << " ("
             if logging_view
               log_message << view_runtime
-              rackstash_fields[:view] = @view_runtime.round(2)
+              rackstash_fields[:view] = (@view_runtime * 100).round / 100.0
             end
 
             if logging_active_record
@@ -55,7 +55,7 @@ module Rackstash
 
               log_message << ", " if logging_view
               log_message << ("DB: %.0f" % db_runtime) + ")"
-              rackstash_fields[:db] = db_runtime.round(2)
+              rackstash_fields[:db] = (db_runtime * 100).round / 100.0
             else
               ")"
             end
