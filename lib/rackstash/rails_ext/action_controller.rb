@@ -66,7 +66,7 @@ module Rackstash
           logger.info(log_message)
           response.headers["X-Runtime"] = "%.0f" % ms
 
-          rackstash_fields[:duration] = ms.round(2)
+          rackstash_fields[:duration] = (ms * 100).round / 100.0
           rackstash_fields[:location] = response.location if response.location
         else
           perform_action_without_benchmark
