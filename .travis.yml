@@ -6,3 +6,6 @@ gemfile:
   - test/gemfiles/Gemfile.rack
   - test/gemfiles/Gemfile.rails_2.3
   - test/gemfiles/Gemfile.rails_3.2
+before_install:
+  - "sudo apt-get update -qq"
+  - "sudo apt-get --no-install-recommends install libzmq-dev"
