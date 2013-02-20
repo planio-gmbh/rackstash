@@ -8,17 +8,19 @@ module Rackstash
     def initialize(logger)
       @logger = logger
       @buffer = {}
+
+      # Note: Buffered logs need to be explicitly flushed to the underlying
+      # logger using +flush_and_pop_buffer+. This will not flush the underlying
+      # logger. If this is required, you still need to call
+      # +BufferedLogger#logger.flush+
+      class << self; def_delegator :@logger, :flush; end if @logger.respond_to?(:flush)
+      class << self; def_delegator :@logger, :auto_flushing; end if @logger.respond_to?(:auto_flushing)
+      class << self; def_delegator :@logger, :auto_flushing=; end if @logger.respond_to?(:auto_flushing=)
     end
 
     attr_reader :logger
     def_delegators :@logger, :level, :level=
     def_delegators :@logger, :silencer, :silencer=, :silence
-
-    # Note: Buffered logs need to be explicitly flushed to the underlying
-    # logger using +flush_and_pop_buffer+. This will not flush the underlying
-    # logger. If this is required, you still need to call
-    # +BufferedLogger#logger.flush+
-    def_delegators :@logger, :flush, :auto_flushing, :auto_flushing=
 
     def add(severity, message = nil, progname = nil, &block)
       return if level > severity
