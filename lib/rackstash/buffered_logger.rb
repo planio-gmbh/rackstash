@@ -31,7 +31,7 @@ module Rackstash
         buffer[:messages] << line
         message
       else
-        json = logstash_event([line], default_fields)
+        json = logstash_event([line], default_fields, [])
         logger.add(severity, json)
       end
     end
@@ -52,6 +52,10 @@ module Rackstash
       buffer && buffer[:fields]
     end
 
+    def tags
+      buffer && buffer[:tags]
+    end
+
     def close
       flush_and_pop_buffer while buffering?
       logger.flush if logger.respond_to?(:flush)
@@ -61,7 +65,8 @@ module Rackstash
     def push_buffer
       child_buffer = {
         :messages => [],
-        :fields => default_fields
+        :fields => default_fields,
+        :tags => []
       }
 
       self.buffer_stack ||= []
@@ -77,7 +82,7 @@ module Rackstash
 
     def flush_and_pop_buffer
       if buffering?
-        json = logstash_event(buffer[:messages], buffer[:fields])
+        json = logstash_event(buffer[:messages], buffer[:fields], buffer[:tags])
         logger.send(Rackstash.log_level, json)
         logger.flush if logger.respond_to?(:flush)
       end
@@ -144,7 +149,7 @@ module Rackstash
       end
     end
 
-    def logstash_event(logs=[], fields={})
+    def logstash_event(logs=[], fields={}, tags=[])
       message = ""
       logs.each do |line|
         # make sure we have a trailing newline
@@ -161,7 +166,7 @@ module Rackstash
       event = LogStash::Event.new(
         "@message" => message,
         "@fields" => fields,
-        "@tags" => Rackstash.tags,
+        "@tags" => (Rackstash.tags | tags),
         "@source" => Rackstash.source
       )
       event.to_json
