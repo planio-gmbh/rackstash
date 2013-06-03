@@ -66,7 +66,8 @@ module Rackstash
       child_buffer = {
         :messages => [],
         :fields => default_fields,
-        :tags => []
+        :tags => [],
+        :do_not_log => false
       }
 
       self.buffer_stack ||= []
@@ -81,9 +82,11 @@ module Rackstash
     end
 
     def flush_and_pop_buffer
-      if buffering?
-        json = logstash_event(buffer[:messages], buffer[:fields], buffer[:tags])
-        logger.send(Rackstash.log_level, json)
+      if buffer = self.buffer
+        unless buffer[:do_not_log]
+          json = logstash_event(buffer[:messages], buffer[:fields], buffer[:tags])
+          logger.send(Rackstash.log_level, json)
+        end
         logger.flush if logger.respond_to?(:flush)
       end
 
@@ -92,6 +95,10 @@ module Rackstash
 
     def buffering?
       !!buffer
+    end
+
+    def do_not_log!(yes_or_no=true)
+      buffer[:do_not_log] = !!yes_or_no
     end
 
   protected
