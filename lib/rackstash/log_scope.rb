@@ -1,7 +1,7 @@
 module Rackstash
   module LogScope
     def with_log_buffer(&block)
-       push_buffer
+       Rackstash.logger.push_buffer
        yield
     rescue Exception => exception
       # Add some details about an exception to the logs
@@ -15,15 +15,6 @@ module Rackstash
       Rackstash.logger.fields.reverse_merge!(fields) if Rackstash.logger.fields
       raise
     ensure
-      flush_and_pop_buffer
-    end
-
-  protected
-    def push_buffer
-      Rackstash.logger.push_buffer
-    end
-
-    def flush_and_pop_buffer
       Rackstash.logger.flush_and_pop_buffer
     end
   end
