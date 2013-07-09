@@ -11,7 +11,7 @@ Object.const_set(:RUBY_ENGINE, "ruby") unless Object.const_defined?(:RUBY_ENGINE
 require "logstash-event"
 
 module Rackstash
-  include Rackstash::LogScope
+  extend Rackstash::LogScope
 
   # The level with which the logs are emitted, by default info
   mattr_accessor :log_level
