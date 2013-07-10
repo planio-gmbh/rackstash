@@ -5,8 +5,15 @@ module Rackstash
     extend Forwardable
     include Rackstash::LogSeverity
 
+    class SimpleFormatter < ::Logger::Formatter
+      def call(severity, timestamp, progname, msg)
+        "#{String === msg ? msg : msg.inspect}\n"
+      end
+    end
+
     def initialize(logger)
       @logger = logger
+      @logger.formatter = SimpleFormatter.new if @logger.respond_to?(:formatter=)
       @buffer = {}
 
       # Note: Buffered logs need to be explicitly flushed to the underlying
@@ -19,6 +26,7 @@ module Rackstash
       class << self; def_delegator :@logger, :progname; end if @logger.respond_to?(:progname)
     end
 
+    attr_accessor :formatter
     attr_reader :logger
     def_delegators :@logger, :level, :level=
     def_delegators :@logger, :silencer, :silencer=, :silence
@@ -171,19 +179,16 @@ module Rackstash
     end
 
     def logstash_event(logs=[], fields={}, tags=[])
-      message = ""
-      logs.each do |line|
-        # make sure we have a trailing newline
-        msg = (line[:message][-1] == ?\n ? line[:message] : "#{line[:message]}\n")
-        # remove any leading newlines
-        msg = msg.sub(/^[\n\r]+/, '')
-
-        message << ("[#{Severities[line[:severity]]}] ".rjust(10) + msg)
-      end
+      message = logs.map do |line|
+        # normalize newlines
+        msg = line[:message].gsub(/[\n\r]/, ?\n)
+        # remove any leading newlines and a single trailing newline
+        msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
+        "[#{Severities[line[:severity]]}] ".rjust(10) + msg
+      end.join("\n")
 
       custom_fields = Rackstash.fields
       fields = fields.merge(custom_fields) if custom_fields
-
       event = LogStash::Event.new(
         "@message" => message,
         "@fields" => fields,
