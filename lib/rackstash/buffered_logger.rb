@@ -49,7 +49,7 @@ module Rackstash
         buffer[:messages] << line
         message
       else
-        json = logstash_event([line], default_fields, [])
+        json = logstash_event([line])
         logger.add(severity, json)
       end
     end
@@ -178,7 +178,7 @@ module Rackstash
       end
     end
 
-    def logstash_event(logs=[], fields={}, tags=[])
+    def logstash_event(logs=[], fields=default_fields, tags=[])
       message = logs.map do |line|
         # normalize newlines
         msg = line[:message].gsub(/[\n\r]/, ?\n)
