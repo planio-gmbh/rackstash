@@ -16,15 +16,25 @@ module Rackstash
       class << self; def_delegator :@logger, :flush; end if @logger.respond_to?(:flush)
       class << self; def_delegator :@logger, :auto_flushing; end if @logger.respond_to?(:auto_flushing)
       class << self; def_delegator :@logger, :auto_flushing=; end if @logger.respond_to?(:auto_flushing=)
+      class << self; def_delegator :@logger, :progname; end if @logger.respond_to?(:progname)
     end
 
     attr_reader :logger
     def_delegators :@logger, :level, :level=
     def_delegators :@logger, :silencer, :silencer=, :silence
 
-    def add(severity, message = nil, progname = nil, &block)
-      return if level > severity
-      message = (message || (block && block.call) || progname).to_s
+    def add(severity, message=nil, progname=nil)
+      severity ||= UNKNOWN
+      return true if level > severity
+
+      progname ||= logger.progname if logger.respond_to?(:progname)
+      if message.nil?
+        if block_given?
+          message = yield
+        else
+          message = progname
+        end
+      end
 
       line = {:severity => severity, :message => message}
       if buffering?
@@ -34,6 +44,10 @@ module Rackstash
         json = logstash_event([line], default_fields, [])
         logger.add(severity, json)
       end
+    end
+
+    def <<(message)
+      logger << message
     end
 
     Severities.each do |severity|
