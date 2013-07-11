@@ -2,11 +2,11 @@ module Rackstash
   module Framework
     module Base
       def setup(config={})
-        Rackstash.request_fields = config[:request_fields]
-        Rackstash.fields = config[:fields]
-        Rackstash.source = config[:source]
-        Rackstash.log_level = config[:log_level] || :info
-        Rackstash.tags = config[:tags] || []
+        Rackstash.request_fields = config.rackstash[:request_fields]
+        Rackstash.fields = config.rackstash[:fields]
+        Rackstash.source = config.rackstash[:source]
+        Rackstash.log_level = config.rackstash[:log_level] || :info
+        Rackstash.tags = config.rackstash[:tags] || []
       end
     end
   end

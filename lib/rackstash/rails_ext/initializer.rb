@@ -32,7 +32,7 @@ module Rackstash
           initialize_logger_without_rackstash
         end
 
-        Rackstash.setup(configuration.rackstash)
+        Rackstash.setup(configuration)
       end
     end
   end
