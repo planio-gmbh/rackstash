@@ -33,7 +33,7 @@ Or install it yourself as:
 
 # Usage
 
-## Rails 2
+## Rails
 
 When using bundler (if not, you *really* should start using it), you can just
 add Rackstash to your Gemfile as described above. Then, in the environment
@@ -41,6 +41,7 @@ you want to enable Rackstash output, add a simple
 
 ```ruby
 require 'rackstash'
+config.rackstash.enabled = true
 ```
 
 If you use `Bundler.require` during your Rails initialization, you can skip
@@ -54,7 +55,19 @@ take over all of the Rails logging. You have to require it in either
 `config/environments/<environment name>.rb`.
 
 Additionally, you can configure Rackstash by setting one or more of the
-following configuration settings in the respective environment file.
+settings described in the configuration section in the respective environment
+file.
+
+## Configuration
+
+You have to set the `enabled` attribute to tru to convert the logs to JSON
+using Rackstash:
+
+```ruby
+config.rackstash.enabled = true
+```
+
+Then you can configure a multitude of options and additional fields
 
 ```ruby
 # The source attribute of all Logstash events
@@ -83,7 +96,8 @@ end
 
 config.rackstash.fields = proc do
   {
-    :thread_id => Thread.current.object_id
+    :thread_id => Thread.current.object_id,
+    :app_server => Socket.gethostname
   }
 end
 
@@ -101,7 +115,6 @@ config.rackstash.tags = ['ruby', 'rails2']
 
 # Caveats
 
-* Does only support Rails2 right now
 * No tests yet :(
 
 # Contributing
@@ -117,4 +130,4 @@ config.rackstash.tags = ['ruby', 'rails2']
 # License
 
 MIT. Code extracted from [Planio](http://plan.io).
-Copyright (c) 2012 Holger Just, Planio GmbH
+Copyright (c) 2012-2013 Holger Just, Planio GmbH
