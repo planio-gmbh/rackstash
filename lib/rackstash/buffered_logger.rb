@@ -1,4 +1,7 @@
+require 'rackstash/log_severity'
+
 require 'securerandom'
+require 'logger'
 
 module Rackstash
   class BufferedLogger
