@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_runtime_dependency "logstash-event"
+  gem.add_runtime_dependency "activesupport"
 
   gem.add_development_dependency "minitest"
 end

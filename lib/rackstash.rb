@@ -1,4 +1,4 @@
-require 'action_pack'
+require 'active_support/core_ext/module/attribute_accessors'
 
 require 'rackstash/log_severity'
 require 'rackstash/buffered_logger'
