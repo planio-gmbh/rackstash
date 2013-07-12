@@ -123,6 +123,7 @@ module Rackstash
     end
 
     def do_not_log!(yes_or_no=true)
+      return false unless buffer
       buffer[:do_not_log] = !!yes_or_no
     end
 
