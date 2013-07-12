@@ -27,12 +27,12 @@ module Rackstash
       class << self; def_delegator :@logger, :auto_flushing; end if @logger.respond_to?(:auto_flushing)
       class << self; def_delegator :@logger, :auto_flushing=; end if @logger.respond_to?(:auto_flushing=)
       class << self; def_delegator :@logger, :progname; end if @logger.respond_to?(:progname)
+      class << self; def_delegators :@logger, :silencer, :silencer=, :silence; end if @logger.respond_to?(:silencer)
     end
 
     attr_accessor :formatter
     attr_reader :logger
     def_delegators :@logger, :level, :level=
-    def_delegators :@logger, :silencer, :silencer=, :silence
 
     def add(severity, message=nil, progname=nil)
       severity ||= UNKNOWN
