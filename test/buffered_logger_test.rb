@@ -1,6 +1,9 @@
 require 'test_helper'
 require 'rackstash'
 
+require 'stringio'
+require 'json'
+
 describe Rackstash::BufferedLogger do
   let(:log_output){ StringIO.new }
   let(:base_logger){ Logger.new(log_output) }
