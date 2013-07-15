@@ -186,7 +186,7 @@ module Rackstash
     def logstash_event(logs=[], fields=default_fields, tags=[])
       message = logs.map do |line|
         # normalize newlines
-        msg = line[:message].gsub(/[\n\r]/, ?\n)
+        msg = line[:message].gsub(/[\n\r]/, "\n")
         # remove any leading newlines and a single trailing newline
         msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
         "[#{Severities[line[:severity]]}] ".rjust(10) + msg

@@ -67,12 +67,14 @@ describe Rackstash::BufferedLogger do
       json["@fields"].keys.sort.must_equal %w[log_id pid]
 
       json["@fields"]["pid"].must_equal Process.pid
-      json["@fields"]["log_id"].must_match /\h{8}-\h{4}-\h{4}-\h{4}-\h{12}/
+      json["@fields"]["log_id"].must_match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
       json["@message"].must_equal "   [INFO] Foo Bar Baz"
       json["@source"].must_be_nil
       json["@tags"].must_equal []
       # Timestamp is less than 2 seconds ago
-      ((Time.now-2)..Time.now).must_be :cover?, Time.parse(json["@timestamp"])
+      timestamp_range = ((Time.now-2)..Time.now)
+      method = timestamp_range.respond_to?(:cover?) ? :cover? : :===
+      timestamp_range.must_be method, Time.parse(json["@timestamp"])
     end
   end
 
