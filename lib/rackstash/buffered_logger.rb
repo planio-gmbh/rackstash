@@ -1,7 +1,8 @@
-require 'rackstash/log_severity'
-
-require 'securerandom'
+require 'forwardable'
 require 'logger'
+require 'securerandom'
+
+require 'rackstash/log_severity'
 
 module Rackstash
   class BufferedLogger
