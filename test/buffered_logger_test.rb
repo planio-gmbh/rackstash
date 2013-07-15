@@ -9,6 +9,13 @@ describe Rackstash::BufferedLogger do
     Rackstash::BufferedLogger.new(base_logger)
   end
 
+  def with_buffer
+    subject.push_buffer
+    yield
+    subject.flush_and_pop_buffer
+    JSON.parse(log_output.string) rescue nil
+  end
+
   it "must be properly initialized" do
     subject.logger.formatter.must_be_instance_of Rackstash::BufferedLogger::SimpleFormatter
     subject.buffering?.must_equal false
@@ -67,9 +74,8 @@ describe Rackstash::BufferedLogger do
   end
 
   describe "when using a buffer" do
-    before{ subject.push_buffer }
-
     it "should buffer logs" do
+      subject.push_buffer
       subject.info("Hello")
       log_output.string.must_be_empty
 
@@ -77,6 +83,34 @@ describe Rackstash::BufferedLogger do
       subject.flush_and_pop_buffer
 
       log_output.string.must_include '"@message":"   [INFO] Hello\n   [INFO] World"'
+    end
+
+    it "can set additional tags" do
+      json = with_buffer do
+        subject.tags << :foo
+        subject.info("Hello")
+      end
+
+      json["@tags"].must_equal ["foo"]
+    end
+
+    it "can set additional fields" do
+      json = with_buffer do
+        subject.fields[:foo] = :bar
+        subject.info("Hello")
+      end
+
+      json["@fields"]["foo"].must_equal "bar"
+    end
+
+    it "can overwrite automatically filled fields" do
+      json = with_buffer do
+        subject.fields[:pid] = "foobarbaz"
+        subject.info("Hello")
+      end
+
+      json["@fields"]["pid"].wont_equal Process.pid
+      json["@fields"]["pid"].must_equal "foobarbaz"
     end
   end
 end
