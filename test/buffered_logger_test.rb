@@ -76,6 +76,16 @@ describe Rackstash::BufferedLogger do
       method = timestamp_range.respond_to?(:cover?) ? :cover? : :===
       timestamp_range.must_be method, Time.parse(json["@timestamp"])
     end
+
+    it "allows to log nil" do
+      subject.info nil
+      log_output.string.must_include '"@message":"   [INFO] "'
+    end
+
+    it "allows to log numerics" do
+      subject.info 12.123
+      log_output.string.must_include '"@message":"   [INFO] 12.123"'
+    end
   end
 
   describe "when using a buffer" do
