@@ -65,7 +65,7 @@ module Rackstash
     Severities.each do |severity|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
         def #{severity.to_s.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
-          add(#{severity}, message, progname, &block)                         #   add(DEBUG, message, progname, &block)
+          add(#{severity}, message.to_s, progname, &block)                    #   add(DEBUG, message.to_s, progname, &block)
         end                                                                   # end
                                                                               #
         def #{severity.to_s.downcase}?                                        # def debug?
