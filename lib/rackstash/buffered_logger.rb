@@ -183,19 +183,21 @@ module Rackstash
       end
     end
 
-    def logstash_event(logs=[], fields=default_fields, tags=[])
-      message = logs.map do |line|
+    def normalized_message(logs=[])
+      logs.map do |line|
         # normalize newlines
         msg = line[:message].gsub(/[\n\r]/, "\n")
         # remove any leading newlines and a single trailing newline
         msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
         "[#{Severities[line[:severity]]}] ".rjust(10) + msg
       end.join("\n")
+    end
 
+    def logstash_event(logs=[], fields=default_fields, tags=[])
       custom_fields = Rackstash.fields
       fields = fields.merge(custom_fields) if custom_fields
       event = LogStash::Event.new(
-        "@message" => message,
+        "@message" => normalized_message(logs),
         "@fields" => fields,
         "@tags" => (Rackstash.tags | tags),
         "@source" => Rackstash.source
