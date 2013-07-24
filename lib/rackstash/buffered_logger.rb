@@ -24,11 +24,9 @@ module Rackstash
       # logger using +flush_and_pop_buffer+. This will not flush the underlying
       # logger. If this is required, you still need to call
       # +BufferedLogger#logger.flush+
-      class << self; def_delegator :@logger, :flush; end if @logger.respond_to?(:flush)
-      class << self; def_delegator :@logger, :auto_flushing; end if @logger.respond_to?(:auto_flushing)
-      class << self; def_delegator :@logger, :auto_flushing=; end if @logger.respond_to?(:auto_flushing=)
-      class << self; def_delegator :@logger, :progname; end if @logger.respond_to?(:progname)
-      class << self; def_delegators :@logger, :silencer, :silencer=, :silence; end if @logger.respond_to?(:silencer)
+      delegate_if_required :@logger, :flush, :auto_flushing, :auto_flushing=
+      delegate_if_required :@logger, :progname
+      delegate_if_required :@logger, :silencer, :silencer=, :silence
     end
 
     attr_accessor :formatter
@@ -129,6 +127,16 @@ module Rackstash
     end
 
   protected
+    def delegate_if_required(object_name, *methods)
+      object = instance_variable_get(object_name)
+      methods = Array(methods).select{|method| object.respond_to? method}
+
+      metaclass = class << self; self; end
+      methods.each do |method|
+        metaclass.instance_eval{ def_delegator object, method }
+      end
+    end
+
     def default_fields
       { :log_id => uuid, :pid => Process.pid }
     end

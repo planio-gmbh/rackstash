@@ -28,6 +28,29 @@ describe Rackstash::BufferedLogger do
     subject.tags.must_equal nil
   end
 
+  describe "when passing a logger" do
+    it "delegates only defined methods" do
+      # sanity
+      base_logger.wont_respond_to :flush
+      base_logger.wont_respond_to :auto_flushing
+
+      base_logger.instance_eval{ def flush; end }
+
+      base_logger.must_respond_to :flush
+      base_logger.wont_respond_to :auto_flushing
+      subject.must_respond_to :flush
+      subject.wont_respond_to :auto_flushing
+    end
+
+    it "delegates later methods too" do
+      base_logger.wont_respond_to :auto_flushing # sanity
+      base_logger.instance_eval{ def auto_flushing; end }
+
+      base_logger.must_respond_to :auto_flushing
+      subject.must_respond_to :auto_flushing
+    end
+  end
+
   describe "when using the Logger API" do
     it "forwards base methods to the underlying logger" do
       subject.logger.must_be_same_as base_logger
