@@ -12,10 +12,15 @@ structured fields which can then be used in a Logstash environment. By
 default, Rackstash collects the very same data that Lograge collects.
 
 Given that Rackstash deals with potentially large amounts of log data per
-request, it is not suitable for usage with syslog as it is restricted to 1024
-Bytes. You should use something like
-[beaver](https://github.com/josegonzalez/beaver) to ship the logs to a central
-logstash server.
+request, it might be difficult to use with syslog. You would have to set the
+supported message size rather high and have to make sure that all syslog
+servers can handle the large messages. Rackstash is known to work with a
+[syslog_logger](https://rubygems.org/gems/SyslogLogger) as the underlying
+logger shipping to a sufficiently configured rsyslog.
+
+In any case is probably much easier to setup Logstash directly on the
+application server to handle the logs and eventually forward them to their
+final destination.
 
 # Installation
 
@@ -45,7 +50,7 @@ config.rackstash.enabled = true
 ```
 
 If you use `Bundler.require` during your Rails initialization, you can skip
-the above step.
+the first line of the above step.
 
 Note though that is is **not sufficient** to require Rackstash
 in an initializer (i.e. one of the files in `config/initializers`) as these
@@ -60,7 +65,7 @@ file.
 
 ## Configuration
 
-You have to set the `enabled` attribute to tru to convert the logs to JSON
+You have to set the `enabled` attribute to `true` to convert the logs to JSON
 using Rackstash:
 
 ```ruby
@@ -115,7 +120,8 @@ config.rackstash.tags = ['ruby', 'rails2']
 
 # Caveats
 
-* No tests yet :(
+* Few tests
+* No plain Rack support yet
 
 # Contributing
 
