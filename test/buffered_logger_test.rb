@@ -7,6 +7,9 @@ require 'json'
 describe Rackstash::BufferedLogger do
   let(:log_output){ StringIO.new }
   let(:base_logger){ Logger.new(log_output) }
+  def json
+    JSON.parse(log_output.string.lines.to_a.last)
+  end
 
   subject do
     Rackstash::BufferedLogger.new(base_logger)
@@ -16,7 +19,6 @@ describe Rackstash::BufferedLogger do
     subject.push_buffer
     yield
     subject.flush_and_pop_buffer
-    JSON.parse(log_output.string) rescue nil
   end
 
   it "must be properly initialized" do
@@ -38,13 +40,13 @@ describe Rackstash::BufferedLogger do
   describe "when logging unbuffered" do
     it "supports adding log messages" do
       subject.add nil, "log_empty"
-      log_output.string.must_include '"@message":"[UNKNOWN] log_empty"'
+      json["@message"].must_equal "[UNKNOWN] log_empty"
 
       %w[debug info warn error fatal unknown].each do |severity|
         subject.send severity, "log_#{severity}"
 
         tag = "[#{severity.upcase}] ".rjust(10)
-        log_output.string.must_include %Q{"@message":"#{tag}log_#{severity}"}
+        json["@message"].must_equal "#{tag}log_#{severity}"
       end
     end
 
@@ -56,13 +58,13 @@ describe Rackstash::BufferedLogger do
     it "ignores the instruction to not log a message" do
       subject.do_not_log!.must_equal false
       subject.info "Hello World"
-      log_output.string.must_include "Hello World"
+      json["@message"].must_equal "   [INFO] Hello World"
     end
 
     it "includes the default fields" do
       subject.info "Foo Bar Baz"
 
-      json = JSON.parse(log_output.string)
+      json = self.json
       json.keys.sort.must_equal %w[@fields @message @source @tags @timestamp]
       json["@fields"].keys.sort.must_equal %w[log_id pid]
 
@@ -90,42 +92,44 @@ describe Rackstash::BufferedLogger do
 
   describe "when using a buffer" do
     it "should buffer logs" do
-      subject.push_buffer
-      subject.info("Hello")
-      log_output.string.must_be_empty
+      with_buffer do
+        subject.info("Hello")
+        log_output.string.must_be_empty
+        subject.info("World")
+      end
 
-      subject.info("World")
-      subject.flush_and_pop_buffer
-
-      log_output.string.must_include '"@message":"   [INFO] Hello\n   [INFO] World"'
+      json["@message"].must_equal "   [INFO] Hello\n   [INFO] World"
     end
 
     it "can set additional tags" do
-      json = with_buffer do
+      with_buffer do
         subject.tags << :foo
         subject.info("Hello")
       end
 
       json["@tags"].must_equal ["foo"]
+      json["@message"].must_equal "   [INFO] Hello"
     end
 
     it "can set additional fields" do
-      json = with_buffer do
+      with_buffer do
         subject.fields[:foo] = :bar
         subject.info("Hello")
       end
 
       json["@fields"]["foo"].must_equal "bar"
+      json["@message"].must_equal "   [INFO] Hello"
     end
 
     it "can overwrite automatically filled fields" do
-      json = with_buffer do
+      with_buffer do
         subject.fields[:pid] = "foobarbaz"
         subject.info("Hello")
       end
 
       json["@fields"]["pid"].wont_equal Process.pid
       json["@fields"]["pid"].must_equal "foobarbaz"
+      json["@message"].must_equal "   [INFO] Hello"
     end
   end
 end
