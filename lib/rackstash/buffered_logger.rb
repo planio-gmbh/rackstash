@@ -30,7 +30,7 @@ module Rackstash
       # logger. If this is required, you still need to call
       # +BufferedLogger#logger.flush+
       delegate_if_required :@logger, :flush, :auto_flushing, :auto_flushing=
-      delegate_if_required :@logger, :progname
+      delegate_if_required :@logger, :progname, :progname=
       delegate_if_required :@logger, :silencer, :silencer=, :silence
     end
 
