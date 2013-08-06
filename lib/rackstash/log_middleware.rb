@@ -1,3 +1,5 @@
+require 'rackstash'
+
 module Rackstash
   class LogMiddleware
 

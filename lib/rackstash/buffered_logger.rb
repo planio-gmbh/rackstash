@@ -1,8 +1,13 @@
 require 'forwardable'
 require 'logger'
 require 'securerandom'
-require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/reverse_merge'
+require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/version'
+if ActiveSupport::VERSION::MAJOR < 3
+  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::ReverseMerge) unless Hash.included_modules.include? ActiveSupport::CoreExtensions::Hash::ReverseMerge
+  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::IndifferentAccess) unless Hash.included_modules.include? ActiveSupport::CoreExtensions::Hash::IndifferentAccess
+end
 
 require 'rackstash/log_severity'
 # MRI 1.8 doesn't set the RUBY_ENGINE constant required by logstash-event

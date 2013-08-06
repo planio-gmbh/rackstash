@@ -1,5 +1,10 @@
 require 'active_support/core_ext/module/attribute_accessors'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/version'
+if ActiveSupport::VERSION::MAJOR < 3
+  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::IndifferentAccess) unless Hash.included_modules.include? ActiveSupport::CoreExtensions::Hash::IndifferentAccess
+end
+
 require 'rackstash/buffered_logger'
 require 'rackstash/log_middleware'
 require 'rackstash/version'
