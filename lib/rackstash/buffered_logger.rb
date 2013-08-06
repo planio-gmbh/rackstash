@@ -1,8 +1,13 @@
 require 'forwardable'
 require 'logger'
 require 'securerandom'
+require 'active_support/core_ext/hash/reverse_merge'
 
 require 'rackstash/log_severity'
+# MRI 1.8 doesn't set the RUBY_ENGINE constant required by logstash-event
+Object.const_set(:RUBY_ENGINE, "ruby") unless Object.const_defined?(:RUBY_ENGINE)
+require "logstash-event"
+
 
 module Rackstash
   class BufferedLogger
@@ -70,6 +75,26 @@ module Rackstash
           #{severity} >= level                                                #   DEBUG >= level
         end                                                                   # end
       EOT
+    end
+
+    def with_buffer
+       push_buffer
+       yield
+    rescue Exception => exception
+      # Add some details about an exception to the logs
+      # This won't catch errors in Rails requests as they are catched by
+      # the ActionController::Failsafe middleware before our middleware.
+      if self.fields
+        error_fields = {
+          :error => exception.class.name,
+          :error_message => exception.message,
+          :error_trace => exception.backtrace.join("\n")
+        }
+        self.fields.reverse_merge!(error_fields)
+      end
+      raise
+    ensure
+      flush_and_pop_buffer
     end
 
     def fields

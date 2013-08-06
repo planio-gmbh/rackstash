@@ -2,16 +2,9 @@ require 'active_support/core_ext/module/attribute_accessors'
 
 require 'rackstash/buffered_logger'
 require 'rackstash/log_middleware'
-require 'rackstash/log_scope'
 require 'rackstash/version'
 
-# MRI 1.8 doesn't set the RUBY_ENGINE constant required by logstash-event
-Object.const_set(:RUBY_ENGINE, "ruby") unless Object.const_defined?(:RUBY_ENGINE)
-require "logstash-event"
-
 module Rackstash
-  extend Rackstash::LogScope
-
   # The level with which the logs are emitted, by default info
   mattr_accessor :log_level
   self.log_level = :info
@@ -59,6 +52,14 @@ module Rackstash
   # Additonal tags which are attached to each buffered log event
   mattr_accessor :tags
   self.tags = []
+
+  def self.with_log_buffer(&block)
+    if Rackstash.logger.respond_to?(:with_buffer)
+      Rackstash.logger.with_buffer(&block)
+    else
+      yield
+    end
+  end
 
   def self.framework
     @framework ||= begin

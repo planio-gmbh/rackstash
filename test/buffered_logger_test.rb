@@ -15,12 +15,6 @@ describe Rackstash::BufferedLogger do
     Rackstash::BufferedLogger.new(base_logger)
   end
 
-  def with_buffer
-    subject.push_buffer
-    yield
-    subject.flush_and_pop_buffer
-  end
-
   it "must be properly initialized" do
     subject.logger.formatter.must_be_instance_of Rackstash::BufferedLogger::SimpleFormatter
     subject.buffering?.must_equal false
@@ -115,7 +109,7 @@ describe Rackstash::BufferedLogger do
 
   describe "when using a buffer" do
     it "should buffer logs" do
-      with_buffer do
+      subject.with_buffer do
         subject.info("Hello")
         log_output.string.must_be_empty
         subject.info("World")
@@ -125,7 +119,7 @@ describe Rackstash::BufferedLogger do
     end
 
     it "can set additional tags" do
-      with_buffer do
+      subject.with_buffer do
         subject.tags << :foo
         subject.info("Hello")
       end
@@ -135,7 +129,7 @@ describe Rackstash::BufferedLogger do
     end
 
     it "can set additional fields" do
-      with_buffer do
+      subject.with_buffer do
         subject.fields[:foo] = :bar
         subject.info("Hello")
       end
@@ -145,7 +139,7 @@ describe Rackstash::BufferedLogger do
     end
 
     it "can overwrite automatically filled fields" do
-      with_buffer do
+      subject.with_buffer do
         subject.fields[:pid] = "foobarbaz"
         subject.info("Hello")
       end
@@ -153,6 +147,26 @@ describe Rackstash::BufferedLogger do
       json["@fields"]["pid"].wont_equal Process.pid
       json["@fields"]["pid"].must_equal "foobarbaz"
       json["@message"].must_equal "   [INFO] Hello"
+    end
+
+    it "captures exceptions" do
+      exception = Class.new(StandardError) do
+        def self.name
+          "SomethingWrongError"
+        end
+      end
+
+      proc do
+        subject.with_buffer do
+          raise exception, "Something is wrong"
+        end
+      end.must_raise(exception)
+
+      json["@message"].must_equal ""
+      json["@fields"]["error"].must_equal "SomethingWrongError"
+      json["@fields"]["error_message"].must_equal "Something is wrong"
+      json["@fields"]["error_trace"].must_match /\A#{__FILE__}:\d+/
+      json["@fields"]["error_trace"].must_match /^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/
     end
   end
 end
