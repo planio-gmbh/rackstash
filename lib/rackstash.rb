@@ -34,7 +34,7 @@ module Rackstash
   #  - Any object that responds to to_proc and returns a hash
   #
   mattr_writer :fields
-  self.fields = nil
+  self.fields = {}
   def self.fields
     if @@fields.respond_to?(:to_proc)
       @@fields.to_proc.call
@@ -50,7 +50,10 @@ module Rackstash
   mattr_accessor :logger
 
   # Additonal tags which are attached to each buffered log event
-  mattr_accessor :tags
+  mattr_reader :tags
+  def self.tags=(tags)
+    @@tags = tags.map(&:to_s)
+  end
   self.tags = []
 
   def self.with_log_buffer(&block)

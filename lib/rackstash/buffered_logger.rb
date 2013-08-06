@@ -105,6 +105,18 @@ module Rackstash
       buffer && buffer[:tags]
     end
 
+    def source=(value)
+      @source = value
+      @source_is_customized = true
+    end
+    def source
+      if @source_is_customized
+        @source
+      else
+        Rackstash.respond_to?(:source) && Rackstash.source
+      end
+    end
+
     def close
       flush_and_pop_buffer while buffering?
       logger.flush if logger.respond_to?(:flush)
@@ -134,7 +146,8 @@ module Rackstash
       if buffer = self.buffer
         unless buffer[:do_not_log]
           json = logstash_event(buffer[:messages], buffer[:fields], buffer[:tags])
-          logger.send(Rackstash.log_level, json)
+          log_level = Rackstash.respond_to?(:log_level) ? Rackstash.log_level : :info
+          logger.send(log_level, json)
         end
         logger.flush if logger.respond_to?(:flush)
       end
@@ -227,13 +240,17 @@ module Rackstash
     end
 
     def logstash_event(logs=[], fields=default_fields, tags=[])
-      custom_fields = Rackstash.fields
-      fields = fields.merge(custom_fields) if custom_fields
+      rackstash_fields = Rackstash.respond_to?(:fields) ? Rackstash.fields : {}
+      fields = rackstash_fields.merge(fields)
+
+      rackstash_tags = Rackstash.respond_to?(:tags) ? Rackstash.tags : []
+      tags = rackstash_tags | tags.map(&:to_s)
+
       event = LogStash::Event.new(
         "@message" => normalized_message(logs),
         "@fields" => fields,
-        "@tags" => (Rackstash.tags | tags),
-        "@source" => Rackstash.source
+        "@tags" => tags,
+        "@source" => self.source
       )
       event.to_json
     end

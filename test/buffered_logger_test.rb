@@ -20,6 +20,7 @@ describe Rackstash::BufferedLogger do
     subject.buffering?.must_equal false
     subject.fields.must_equal nil
     subject.tags.must_equal nil
+    subject.source.must_equal nil
   end
 
   describe "when passing a logger" do
@@ -98,12 +99,18 @@ describe Rackstash::BufferedLogger do
 
     it "allows to log nil" do
       subject.info nil
-      log_output.string.must_include '"@message":"   [INFO] "'
+      json["@message"].must_equal "   [INFO] "
     end
 
     it "allows to log numerics" do
       subject.info 12.123
-      log_output.string.must_include '"@message":"   [INFO] 12.123"'
+      json["@message"].must_equal "   [INFO] 12.123"
+    end
+
+    it "allows to set a source" do
+      subject.source = "BufferedLoggerTest"
+      subject.info nil
+      json["@source"].must_equal "BufferedLoggerTest"
     end
   end
 
