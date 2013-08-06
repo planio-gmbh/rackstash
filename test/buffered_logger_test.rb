@@ -151,7 +151,6 @@ describe Rackstash::BufferedLogger do
         subject.info("Hello")
       end
 
-      json["@fields"]["pid"].wont_equal Process.pid
       json["@fields"]["pid"].must_equal "foobarbaz"
       json["@message"].must_equal "   [INFO] Hello"
     end
