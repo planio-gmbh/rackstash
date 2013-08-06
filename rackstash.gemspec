@@ -6,11 +6,11 @@ require 'rackstash/version'
 Gem::Specification.new do |gem|
   gem.name          = "rackstash"
   gem.version       = Rackstash::VERSION
-  gem.authors       = ["Holger Just"]
+  gem.authors       = ["Holger Just, Planio GmbH"]
   gem.email         = ["holger@plan.io"]
   gem.description   = %q{Making Rack and Rails logs useful}
   gem.summary       = %q{Making Rack and Rails logs useful}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/planio-gmbh/rackstash"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
