@@ -1,6 +1,7 @@
 require 'forwardable'
 require 'logger'
 require 'securerandom'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/reverse_merge'
 
 require 'rackstash/log_severity'
@@ -176,7 +177,7 @@ module Rackstash
     end
 
     def default_fields
-      { :log_id => uuid, :pid => Process.pid }
+      HashWithIndifferentAccess.new({"log_id" => uuid, "pid" => Process.pid})
     end
 
     def buffer

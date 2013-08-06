@@ -1,5 +1,5 @@
 require 'active_support/core_ext/module/attribute_accessors'
-
+require 'active_support/core_ext/hash/indifferent_access'
 require 'rackstash/buffered_logger'
 require 'rackstash/log_middleware'
 require 'rackstash/version'
@@ -17,13 +17,14 @@ module Rackstash
   #  - Any object that responds to to_proc and returns a hash
   #
   mattr_writer :request_fields
-  self.request_fields = nil
+  self.request_fields = HashWithIndifferentAccess.new
   def self.request_fields(controller)
     if @@request_fields.respond_to?(:to_proc)
-      controller.instance_eval(&@@request_fields)
+      ret = controller.instance_eval(&@@request_fields)
     else
-      @@request_fields
+      ret = @@request_fields
     end
+    HashWithIndifferentAccess.new(ret)
   end
 
   # Custom fields that will be merged with every log object, be it a captured
@@ -34,13 +35,14 @@ module Rackstash
   #  - Any object that responds to to_proc and returns a hash
   #
   mattr_writer :fields
-  self.fields = {}
+  self.fields = HashWithIndifferentAccess.new
   def self.fields
     if @@fields.respond_to?(:to_proc)
-      @@fields.to_proc.call
+      ret = @@fields.to_proc.call
     else
-      @@fields
+      ret = @@fields
     end
+    HashWithIndifferentAccess.new(ret)
   end
 
   # The source attribute in the generated Logstash output
