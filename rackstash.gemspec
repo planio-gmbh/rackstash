@@ -22,4 +22,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "thor"
 
   gem.add_development_dependency "minitest"
+  gem.add_development_dependency "rake"
+  gem.add_development_dependency "json"
 end
