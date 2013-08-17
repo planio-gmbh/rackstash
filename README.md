@@ -9,18 +9,19 @@ difference between Rackstash and Lograge is that Lograge attempts to
 completely remove the existing logging and to replaces it with its own log
 line. Rackstash instead retains the existing logs and just enhances them with
 structured fields which can then be used in a Logstash environment. By
-default, Rackstash collects the very same data that Lograge collects.
+default, Rackstash collects the very same data that Lograge collects plus the
+original full request log.
 
 Given that Rackstash deals with potentially large amounts of log data per
 request, it might be difficult to use with syslog. You would have to set the
 supported message size rather high and have to make sure that all syslog
 servers can handle the large messages. Rackstash is known to work with a
 [syslog_logger](https://rubygems.org/gems/SyslogLogger) as the underlying
-logger shipping to a sufficiently configured rsyslog.
+logger when its shipping to a sufficiently configured rsyslog.
 
 In any case is probably much easier to setup Logstash directly on the
-application server to handle the logs and eventually forward them to their
-final destination.
+application server to read the logs from the default log file location and
+to eventually forward them to their final destination.
 
 # Installation
 
@@ -38,7 +39,23 @@ Or install it yourself as:
 
 # Usage
 
-## Rails
+## Rails 3, Rails 4
+
+Just add Rackstash to your Gemfile as described above. Then, in the
+environment you want to enable Rackstash output, add a simple
+
+```ruby
+# config/environments/production.rb
+MyApp::Application.configure do
+  config.rackstash.enabled = true
+end
+```
+
+Additionally, you can configure Rackstash by setting one or more of the
+settings described in the configuration section below in the respective
+environment file.
+
+## Rails 2
 
 When using bundler (if not, you *really* should start using it), you can just
 add Rackstash to your Gemfile as described above. Then, in the environment
