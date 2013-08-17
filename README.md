@@ -88,8 +88,8 @@ config.rackstash.source = "http://rails.example.com"
 config.rackstash.request_fields = proc do
   {
     :host => request.host,
-    :source_ip => request.headers['X-Forwarded-For'],
-    :content-length => response.headers['Content-Length']
+    :source_ip => request.remote_ip,
+    :user_agent => request.user_agent
   }
 end
 
