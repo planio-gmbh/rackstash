@@ -79,13 +79,17 @@ Then you can configure a multitude of options and additional fields
 # By default: "unknown"
 config.rackstash.source = "http://rails.example.com"
 
+# An array of strings with which all emited log events are tagged.
+# By default empty.
+config.rackstash.tags = ['ruby', 'rails2']
+
 # Additional fields which are included into each log event that
 # originates from a captured request.
 # Can either be a Hash or an object which responds to to_proc which
 # subsequently returns a Hash. If it is the latter, the proc will be exceuted
 # similar to an after filter in every request of the controller and thus has
 # access to the controller state after the request was handled.
-config.rackstash.request_fields = proc do
+config.rackstash.request_fields = lambda do
   {
     :host => request.host,
     :source_ip => request.remote_ip,
@@ -99,7 +103,7 @@ end
 # Similar to the request_fields, this can be either a static Hash or an
 # object which responds to to_proc and returns a Hash there.
 
-config.rackstash.fields = proc do
+config.rackstash.fields = lambda do
   {
     :thread_id => Thread.current.object_id,
     :app_server => Socket.gethostname
@@ -112,10 +116,6 @@ end
 # level
 # By default: :info
 config.rackstash.log_level = :info
-
-# An array of strings with which all emited log events are tagged.
-# By default empty.
-config.rackstash.tags = ['ruby', 'rails2']
 ```
 
 # Caveats
