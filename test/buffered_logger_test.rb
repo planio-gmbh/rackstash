@@ -171,8 +171,10 @@ describe Rackstash::BufferedLogger do
       json["@message"].must_equal ""
       json["@fields"]["error"].must_equal "SomethingWrongError"
       json["@fields"]["error_message"].must_equal "Something is wrong"
-      json["@fields"]["error_trace"].must_match /\A#{__FILE__}:\d+/
-      json["@fields"]["error_trace"].must_match /^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/
+      json["@fields"]["error_backtrace"].must_match /\A#{__FILE__}:\d+/
+      json["@fields"]["error_backtrace"].must_match /^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/
     end
+
+
   end
 end

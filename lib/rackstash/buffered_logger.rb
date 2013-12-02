@@ -94,7 +94,7 @@ module Rackstash
         error_fields = {
           :error => exception.class.name,
           :error_message => exception.message,
-          :error_trace => exception.backtrace.join("\n")
+          :error_backtrace => exception.backtrace.join("\n")
         }
         self.fields.reverse_merge!(error_fields)
       end
