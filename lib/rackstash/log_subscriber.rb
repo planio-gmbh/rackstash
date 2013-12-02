@@ -39,10 +39,11 @@ module Rackstash
     def extract_exception(payload)
       if payload[:exception]
         exception, message = payload[:exception]
-        {
+        ret = {
           :error => exception.to_s,
           :error_message => message
         }
+        ret[:error_backtrace] = payload[:exception_backtrace] if payload[:exception_backtrace]
       else
         {}
       end
@@ -79,6 +80,7 @@ module Rackstash
     def append_info_to_payload(payload)
       super
       payload[:rackstash_request_fields] = Rackstash.request_fields(self)
+      payload[:exception_backtrace] = request.env["action_dispatch.exception"].join("\n") if request.env["action_dispatch.exception"]
     end
   end
 end

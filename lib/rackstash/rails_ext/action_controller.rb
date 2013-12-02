@@ -75,6 +75,7 @@ module Rackstash
         rackstash_fields ||= {}
         rackstash_fields[:error] = exception.class.name
         rackstash_fields[:error_message] = exception.message
+        rackstash_fields[:error_backtrace] = exception.backtrace.join("\n") if exception.backtrace
         raise
       ensure
         if logger && logger.respond_to?(:fields) && logger.fields
