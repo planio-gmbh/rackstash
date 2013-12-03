@@ -3,3 +3,4 @@ source 'https://rubygems.org'
 gemspec :path => "../..", :name => 'rackstash'
 
 gem "rails", "~> 4.0.0"
+gem "mime-types", "< 2.0.0", :platforms => [:mri_18]
