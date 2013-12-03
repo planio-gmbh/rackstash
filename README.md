@@ -145,6 +145,7 @@ config.rackstash.log_level = :info
 [![Gem Version](https://badge.fury.io/rb/rackstash.png)](https://rubygems.org/gems/rackstash)
 [![Build Status](https://secure.travis-ci.org/planio-gmbh/rackstash.png?branch=master)](https://travis-ci.org/planio-gmbh/rackstash)
 [![Code Climate](https://codeclimate.com/github/planio-gmbh/rackstash.png)](https://codeclimate.com/github/planio-gmbh/rackstash)
+[![Coverage Status](https://coveralls.io/repos/planio-gmbh/rackstash/badge.png?branch=master)](https://coveralls.io/r/planio-gmbh/rackstash?branch=master)
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
