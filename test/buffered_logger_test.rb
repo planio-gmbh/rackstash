@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'rackstash'
+require 'rackstash/buffered_logger'
 
 require 'stringio'
 require 'json'
