@@ -73,8 +73,8 @@ module Rackstash
 
   def self.framework
     @framework ||= begin
-      if Object.const_defined?(:ActionPack)
-        ActionPack::VERSION::MAJOR >= 3 ? "rails3" : "rails2"
+      if Object.const_defined?(:Rails)
+        Rails::VERSION::MAJOR >= 3 ? "rails3" : "rails2"
       else
         "rack"
       end
