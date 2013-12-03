@@ -39,11 +39,11 @@ module Rackstash
     def extract_exception(payload)
       if payload[:exception]
         exception, message = payload[:exception]
-        ret = {
+        {
           :error => exception.to_s,
-          :error_message => message
+          :error_message => message,
+          :error_backtrace => payload[:exception_backtrace]
         }
-        ret[:error_backtrace] = payload[:exception_backtrace] if payload[:exception_backtrace]
       else
         {}
       end
