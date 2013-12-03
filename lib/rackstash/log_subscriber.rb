@@ -19,6 +19,17 @@ module Rackstash
       Thread.current[:rackstash_location] = event.payload[:location]
     end
 
+    def _extract_exception_backtrace(env)
+      return unless env['action_dispatch.exception']
+
+      exception_wrapper = ActionDispatch::ExceptionWrapper.new(env, env['action_dispatch.exception'])
+      data = {
+        :error_backtrace => exception_wrapper.full_trace.join("\n")
+      }
+      Rails.logger.fields.reverse_merge!(data)
+    end
+
+
     protected
     def extract_request(payload)
       {
@@ -41,8 +52,7 @@ module Rackstash
         exception, message = payload[:exception]
         {
           :error => exception.to_s,
-          :error_message => message,
-          :error_backtrace => payload[:exception_backtrace]
+          :error_message => message
         }
       else
         {}
@@ -80,7 +90,6 @@ module Rackstash
     def append_info_to_payload(payload)
       super
       payload[:rackstash_request_fields] = Rackstash.request_fields(self)
-      payload[:exception_backtrace] = request.env["action_dispatch.exception"].join("\n") if request.env["action_dispatch.exception"]
     end
   end
 end
