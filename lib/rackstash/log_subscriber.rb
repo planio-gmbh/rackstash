@@ -66,10 +66,22 @@ module Rackstash
         :view => event.payload[:view_runtime],
         :db => event.payload[:db_runtime]
       }.inject({}) do |runtimes, (name, runtime)|
-        runtimes[name] = runtime.to_f.round(2) if runtime
+        runtimes[name] = round(runtime, 2) if runtime
         runtimes
       end
     end
+
+    if 0.0.method(:round).arity == 0
+      def round(float, ndigits=0)
+        power = (10**ndigits).to_f
+        (float * power).round / power
+      end
+    else
+      def round(float, ndigits=0)
+        float.to_f.round(ndigits)
+      end
+    end
+
 
     def location(event)
       if location = Thread.current[:rackstash_location]
