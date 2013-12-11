@@ -8,5 +8,7 @@ end
 # mime-types >= 2.0.0 is only supported on Ruby >= 1.9.2
 gem "mime-types", "< 2.0.0"
 
+gem "rubysl", :platforms => [:rbx]
+
 # Specify your gem's dependencies in rackstash.gemspec
 gemspec
