@@ -25,4 +25,12 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rake"
   gem.add_development_dependency "json"
   gem.add_development_dependency "coveralls"
+
+  if RbConfig::CONFIG["RUBY_INSTALL_NAME"] == "rbx"
+    gem.add_runtime_dependency "rubysl", "~> 2.0"
+
+    gem.add_development_dependency 'rubinius-coverage', '~> 2.0'
+    gem.add_development_dependency 'parser', '~> 2.1.0.pre1'
+    gem.add_development_dependency 'racc', '~> 1.4'
+  end
 end
