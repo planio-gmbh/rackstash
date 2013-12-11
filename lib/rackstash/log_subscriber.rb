@@ -4,6 +4,7 @@ require 'active_support/log_subscriber'
 module Rackstash
   class LogSubscriber < ActiveSupport::LogSubscriber
     def process_action(event)
+      return unless Rails.logger.respond_to?(:fields) && Rails.logger.fields
       payload = event.payload
 
       data      = extract_request(payload)
