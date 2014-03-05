@@ -7,8 +7,12 @@ require 'json'
 describe Rackstash::BufferedLogger do
   let(:log_output){ StringIO.new }
   let(:base_logger){ Logger.new(log_output) }
+
+  def log_line
+    log_output.string.lines.to_a.last
+  end
   def json
-    JSON.parse(log_output.string.lines.to_a.last)
+    JSON.parse(log_line)
   end
 
   subject do
@@ -175,6 +179,13 @@ describe Rackstash::BufferedLogger do
       json["@fields"]["error_backtrace"].must_match /^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/
     end
 
+    it "doesn't log anything when using do_not_log!" do
+      subject.with_buffer do
+        subject.do_not_log!.must_equal true
+        subject.info "Hello World"
+      end
 
+      log_line.must_be :nil?
+    end
   end
 end
