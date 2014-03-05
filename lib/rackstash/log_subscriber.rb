@@ -36,8 +36,7 @@ module Rackstash
       {
         :controller => payload[:params]['controller'],
         :action => payload[:params]['action'],
-        :format => extract_format(payload),
-        :path => payload[:path]
+        :format => extract_format(payload)
       }
     end
 
