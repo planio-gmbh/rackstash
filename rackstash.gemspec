@@ -24,7 +24,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "minitest"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "json"
-  gem.add_development_dependency "coveralls"
 
   if RbConfig::CONFIG["RUBY_INSTALL_NAME"] == "rbx"
     gem.add_runtime_dependency "rubysl", "~> 2.0"

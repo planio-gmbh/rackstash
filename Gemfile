@@ -9,6 +9,9 @@ if RUBY_VERSION < '1.9.2'
   # mime-types >= 2.0.0 is only supported on Ruby >= 1.9.2
   gem "mime-types", "< 2.0.0"
   gem "activesupport", "< 4.0"
+else
+  # Coveralls is only available on Ruby > 1.9
+  gem "coveralls"
 end
 
 # Specify your gem's dependencies in rackstash.gemspec
