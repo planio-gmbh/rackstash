@@ -33,6 +33,15 @@ describe Rackstash do
       subject.info("foo")
       json["@fields"]["foo"].must_equal "baz"
     end
+
+    it "can be defined as a lambda" do
+      Rackstash.fields = lambda do
+        {:foo => :baz}
+      end
+
+      subject.info("foo")
+      json["@fields"]["foo"].must_equal "baz"
+    end
   end
 
   describe "request_fields" do
@@ -40,7 +49,11 @@ describe Rackstash do
       Rackstash.request_fields = HashWithIndifferentAccess.new
     end
 
-    let(:controller){ Class.new(Object).new }
+    let(:controller) do
+      controller = Class.new(Object){attr_accessor :status}.new
+      controller.status = "running"
+      controller
+    end
 
     it "won't be included in unbuffered mode" do
       Rackstash.request_fields = {:foo => :bar}
@@ -55,27 +68,37 @@ describe Rackstash do
       Rackstash.request_fields(controller).must_be_instance_of HashWithIndifferentAccess
       Rackstash.request_fields(controller).must_equal({"foo" => :bar})
 
-      # FIXME: fake a real request and ensure that the field gets set in the log output
-      # subject.with_buffer do
-      #   subject.info("foo")
-      # end
-      # json["@fields"]["foo"].must_equal "bar"
+      # TODO: fake a real request and ensure that the field gets set in the log output
     end
 
     it "can be defined as a proc" do
-      Rackstash.request_fields = proc do |request|
-        {:foo => :bar}
+      Rackstash.request_fields = proc do |controller|
+        {
+          :foo => :bar,
+          :status => @status,
+          :instance_status => controller.status
+        }
       end
 
       Rackstash.request_fields(controller).must_be_instance_of HashWithIndifferentAccess
-      Rackstash.request_fields(controller).must_equal({"foo" => :bar})
+      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => "running", "instance_status" => "running"})
 
       # TODO: fake a real request and ensure that the field gets set in the log output
-      # subject.with_buffer do
-      #   subject.info("hello")
-      # end
-      # json["@fields"]["foo"].must_equal "bar"
     end
 
+    it "can be defined as a lambda" do
+      Rackstash.request_fields = lambda do |controller|
+        {
+          :foo => :bar,
+          :status => @status,
+          :instance_status => controller.status
+        }
+      end
+
+      Rackstash.request_fields(controller).must_be_instance_of HashWithIndifferentAccess
+      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => "running", "instance_status" => "running"})
+
+      # TODO: fake a real request and ensure that the field gets set in the log output
+    end
   end
 end

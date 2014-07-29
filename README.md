@@ -106,7 +106,7 @@ config.rackstash.tags = ['ruby', 'rails2']
 # subsequently returns a Hash. If it is the latter, the proc will be exceuted
 # similar to an after filter in every request of the controller and thus has
 # access to the controller state after the request was handled.
-config.rackstash.request_fields = lambda do
+config.rackstash.request_fields = lambda do |controller|
   {
     :host => request.host,
     :source_ip => request.remote_ip,
@@ -119,7 +119,9 @@ end
 # log, e.g. from the current thread or from the current environment.
 # Similar to the request_fields, this can be either a static Hash or an
 # object which responds to to_proc and returns a Hash there.
-
+#
+# Note that the proc is not executed in a controller instance and thus doesn't
+# directly have access to the controller state.
 config.rackstash.fields = lambda do
   {
     :thread_id => Thread.current.object_id,
