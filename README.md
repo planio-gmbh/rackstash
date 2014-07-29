@@ -158,4 +158,4 @@ config.rackstash.log_level = :info
 # License
 
 MIT. Code extracted from [Planio](http://plan.io).
-Copyright (c) 2012-2013 Holger Just, Planio GmbH
+Copyright (c) 2012-2014 Holger Just, Planio GmbH
