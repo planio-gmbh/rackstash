@@ -9,6 +9,7 @@ module Rackstash
         unless Rails.logger.is_a?(Rackstash::BufferedLogger)
           Rackstash.logger = Rackstash::BufferedLogger.new(Rails.logger)
           Rails.logger = Rackstash.logger
+          silence_warnings { Object.const_set "RAILS_DEFAULT_LOGGER", Rackstash.logger }
           ActiveRecord::Base.logger = Rackstash.logger if defined?(ActiveRecord::Base)
           ActionController::Base.logger = Rackstash.logger if defined?(ActionController::Base)
         end
