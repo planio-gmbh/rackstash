@@ -7,6 +7,11 @@ module Rackstash
         super
 
         unless Rails.logger.is_a?(Rackstash::BufferedLogger)
+          # This is required by ActiveRecord >= 4
+          if defined?(ActiveRecord::SessionStore::Extension::LoggerSilencer)
+            Rackstash::BufferedLogger.send(:include, ActiveRecord::SessionStore::Extension::LoggerSilencer)
+          end
+
           Rackstash.logger = Rackstash::BufferedLogger.new(Rails.logger)
           Rails.logger = Rackstash.logger
           silence_warnings { Object.const_set "RAILS_DEFAULT_LOGGER", Rackstash.logger }
