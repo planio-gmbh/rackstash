@@ -7,7 +7,6 @@ rvm:
   - 2.1.0
   - jruby-18mode
   - jruby-19mode
-  - rbx-2
 env:
   - RACK_VERSION=1.4.1
   - RAILS_VERSION=2.3.15
