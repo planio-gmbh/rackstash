@@ -31,6 +31,8 @@ module Rackstash
       @logger.formatter = SimpleFormatter.new if @logger.respond_to?(:formatter=)
       @buffer = {}
 
+      @source_is_customized = false
+
       # Note: Buffered logs need to be explicitly flushed to the underlying
       # logger using +flush_and_pop_buffer+. This will not flush the underlying
       # logger. If this is required, you still need to call
