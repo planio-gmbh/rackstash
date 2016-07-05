@@ -19,7 +19,7 @@ module Rackstash
           ActiveRecord::Base.logger = Rackstash.logger if defined?(ActiveRecord::Base)
           ActionController::Base.logger = Rackstash.logger if defined?(ActionController::Base)
           # New in Rails 4
-          ActionView::Base.logger = Rackstash.logger if defined?(ActionView::Base)
+          ActionView::Base.logger = Rackstash.logger if defined?(ActionView::Base) && ActionView::Base.respond_to?(:logger=)
         end
         # The ANSI color codes in the ActiveRecord logs don't help much in
         # plain JSON
