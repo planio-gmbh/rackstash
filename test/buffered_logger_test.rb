@@ -91,7 +91,7 @@ describe Rackstash::BufferedLogger do
       json["@fields"].keys.sort.must_equal %w[log_id pid]
 
       json["@fields"]["pid"].must_equal Process.pid
-      json["@fields"]["log_id"].must_match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+      json["@fields"]["log_id"].must_match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)
       json["@message"].must_equal "   [INFO] Foo Bar Baz"
       json["@source"].must_be_nil
       json["@tags"].must_equal []
@@ -175,8 +175,8 @@ describe Rackstash::BufferedLogger do
       json["@message"].must_equal ""
       json["@fields"]["error"].must_equal "SomethingWrongError"
       json["@fields"]["error_message"].must_equal "Something is wrong"
-      json["@fields"]["error_backtrace"].must_match /\A#{__FILE__}:\d+/
-      json["@fields"]["error_backtrace"].must_match /^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/
+      json["@fields"]["error_backtrace"].must_match(/\A#{__FILE__}:\d+/)
+      json["@fields"]["error_backtrace"].must_match(/^#{File.expand_path("../../lib/rackstash/buffered_logger.rb", __FILE__)}:\d+:in `with_buffer'$/)
     end
 
     it "doesn't log anything when using do_not_log!" do
