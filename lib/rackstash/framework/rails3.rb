@@ -15,8 +15,11 @@ module Rackstash
           Rackstash.logger = Rackstash::BufferedLogger.new(Rails.logger)
           Rails.logger = Rackstash.logger
           silence_warnings { Object.const_set "RAILS_DEFAULT_LOGGER", Rackstash.logger }
+
           ActiveRecord::Base.logger = Rackstash.logger if defined?(ActiveRecord::Base)
           ActionController::Base.logger = Rackstash.logger if defined?(ActionController::Base)
+          # New in Rails 4
+          ActionView::Base.logger = Rackstash.logger if defined?(ActionView::Base)
         end
         # The ANSI color codes in the ActiveRecord logs don't help much in
         # plain JSON
