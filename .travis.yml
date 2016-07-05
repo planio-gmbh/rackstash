@@ -12,12 +12,12 @@ env:
   - RACK_VERSION=1.4.1
   - RAILS_VERSION=2.3.15
   - RAILS_VERSION=3.2.0
-  - RAILS_VERSION=4.0.0
+  - RAILS_VERSION=4.2.0
 before_install:
   - '[ "$TRAVIS_RUBY_VERSION" = "2.1.0" ] && gem install bundler -v ">= 1.5.1" --conservative || true'
 matrix:
   exclude:
     - rvm: 1.8.7
-      env: RAILS_VERSION=4.0.0
+      env: RAILS_VERSION=4.2.0
     - rvm: jruby-18mode
-      env: RAILS_VERSION=4.0.0
+      env: RAILS_VERSION=4.2.0
