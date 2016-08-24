@@ -243,7 +243,10 @@ module Rackstash
         msg = line[:message].to_s.gsub(/[\n\r]/, "\n")
         # remove any leading newlines and a single trailing newline
         msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
-        "[#{Severities[line[:severity]]}] ".rjust(10) + msg
+        msg = "[#{Severities[line[:severity]]}] ".rjust(10) + msg
+        # Normalize the log line to UTF-8
+        msg.encode!(Encoding::UTF_8, :invalid => :replace, :undef => :replace) if msg.respond_to?(:encode!)
+        msg
       end.join("\n")
     end
 
