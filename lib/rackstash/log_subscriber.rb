@@ -21,9 +21,15 @@ module Rackstash
     end
 
     def _extract_exception_backtrace(env)
-      return unless env['action_dispatch.exception']
+      exception = env['action_dispatch.exception']
+      return unless exception
 
-      exception_wrapper = ActionDispatch::ExceptionWrapper.new(env, env['action_dispatch.exception'])
+      if ActionPack.version < Gem::Version.new('5.0')
+        exception_wrapper = ActionDispatch::ExceptionWrapper.new(env, exception)
+      else
+        backtrace_cleaner = env['action_dispatch.backtrace_cleaner']
+        exception_wrapper = ActionDispatch::ExceptionWrapper.new(backtrace_cleaner, exception)
+      end
       data = {
         :error_backtrace => exception_wrapper.full_trace.join("\n")
       }
