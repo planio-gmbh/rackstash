@@ -263,7 +263,12 @@ module Rackstash
         "@tags" => tags,
         "@source" => self.source
       )
-      event.to_json
+      begin
+        event.to_json
+      rescue Exception
+        event['@message'] = '(Could not send message)'
+        event.json
+      end
     end
   end
 end
