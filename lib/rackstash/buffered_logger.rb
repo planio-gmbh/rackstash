@@ -266,8 +266,8 @@ module Rackstash
       begin
         event.to_json
       rescue Exception
-        event['@message'] = '(Could not send message)'
-        event.json
+        event['@message'] = '(Could not serialize message)'
+        event.to_json
       end
     end
   end
