@@ -63,6 +63,22 @@ module Rackstash
   end
   self.tags = []
 
+  def self.with_tags(*tags)
+    if block_given?
+      begin
+        original_tags = self.tags
+        with_log_buffer do
+          self.tags = self.tags + tags.map(&:to_s)
+          yield
+        end
+      ensure
+        self.tags = original_tags
+      end
+    else
+      self.tags = self.tags + tags.map(&:to_s)
+    end
+  end
+
   def self.with_log_buffer(&block)
     if Rackstash.logger.respond_to?(:with_buffer)
       Rackstash.logger.with_buffer(&block)
