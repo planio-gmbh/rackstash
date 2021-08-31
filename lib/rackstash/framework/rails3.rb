@@ -31,10 +31,14 @@ module Rackstash
         # ActionDispatch captures exceptions too early for us to catch
         # Thus, we inject our own exceptions_app to be able to catch the
         # actual backtrace and add it to the fields
-        exceptions_app = config.exceptions_app || ActionDispatch::PublicExceptions.new(Rails.public_path)
-        config.exceptions_app = lambda do |env|
-          log_subscriber._extract_exception_backtrace(env)
-          exceptions_app.call(env)
+        if config.respond_to?(:exceptions_app)
+          exceptions_app = config.exceptions_app || ActionDispatch::PublicExceptions.new(Rails.public_path)
+          config.exceptions_app = lambda do |env|
+            log_subscriber._extract_exception_backtrace(env)
+            exceptions_app.call(env)
+          end
+        else
+          # TODO: figure out how to get exceptions in rails 3.0-3.1
         end
 
         ActionController::Base.send :include, Rackstash::Instrumentation
