@@ -19,12 +19,12 @@ module Rackstash
   #
   # Currently supported formats are:
   #  - Hash
-  #  - Any object that responds to to_proc and returns a hash
+  #  - Any object that responds to #call and returns a hash
   #
   mattr_writer :request_fields
   self.request_fields = HashWithIndifferentAccess.new
   def self.request_fields(controller)
-    if @@request_fields.respond_to?(:to_proc)
+    if @@request_fields.respond_to?(:call)
       ret = controller.instance_eval(&@@request_fields)
     else
       ret = @@request_fields
@@ -37,13 +37,13 @@ module Rackstash
   #
   # Currently supported formats are:
   #  - Hash
-  #  - Any object that responds to to_proc and returns a hash
+  #  - Any object that responds to #call and returns a hash
   #
   mattr_writer :fields
   self.fields = HashWithIndifferentAccess.new
   def self.fields
-    if @@fields.respond_to?(:to_proc)
-      ret = @@fields.to_proc.call
+    if @@fields.respond_to?(:call)
+      ret = @@fields.call
     else
       ret = @@fields
     end
@@ -59,23 +59,36 @@ module Rackstash
   # Additonal tags which are attached to each buffered log event
   mattr_reader :tags
   def self.tags=(tags)
-    @@tags = tags.map(&:to_s)
+    @@tags = tags.map(&:to_s).uniq
   end
   self.tags = []
 
-  def self.with_tags(*tags)
+  # Additional tags to be included when processing a request.
+  mattr_writer :request_tags
+  self.request_tags = []
+  def self.request_tags(controller)
+    @@request_tags.map do |request_tag|
+      if request_tag.respond_to?(:call)
+        request_tag.call(controller.request)
+      else
+        request_tag
+      end
+    end
+  end
+
+  def self.tagged(*tags, &block)
     if block_given?
+      original_tags = self.tags
       begin
-        original_tags = self.tags
         with_log_buffer do
-          self.tags = self.tags + tags.map(&:to_s)
+          self.tags += tags
           yield
         end
       ensure
         self.tags = original_tags
       end
     else
-      self.tags = self.tags + tags.map(&:to_s)
+      self.tags += tags
     end
   end
 
