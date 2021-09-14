@@ -24,12 +24,9 @@ module Rackstash
   mattr_writer :request_fields
   self.request_fields = HashWithIndifferentAccess.new
   def self.request_fields(controller)
-    if @@request_fields.respond_to?(:call)
-      ret = controller.instance_eval(&@@request_fields)
-    else
-      ret = @@request_fields
-    end
-    HashWithIndifferentAccess.new(ret)
+    fields = @@request_fields
+    fields = fields.call(controller.request) if fields.respond_to?(:call)
+    HashWithIndifferentAccess.new(fields)
   end
 
   # Custom fields that will be merged with every log object, be it a captured
@@ -42,12 +39,9 @@ module Rackstash
   mattr_writer :fields
   self.fields = HashWithIndifferentAccess.new
   def self.fields
-    if @@fields.respond_to?(:call)
-      ret = @@fields.call
-    else
-      ret = @@fields
-    end
-    HashWithIndifferentAccess.new(ret)
+    fields = @@fields
+    fields = fields.call if fields.respond_to?(:call)
+    HashWithIndifferentAccess.new(fields)
   end
 
   # The source attribute in the generated Logstash output
