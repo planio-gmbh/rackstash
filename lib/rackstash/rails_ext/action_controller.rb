@@ -84,6 +84,9 @@ module Rackstash
 
           request_fields = Rackstash.request_fields(self)
           logger.fields.merge!(request_fields) if request_fields
+
+          request_tags = Rackstash.request_tags(self)
+          logger.tags.push *request_tags
         end
       end
 
