@@ -102,23 +102,22 @@ config.rackstash.tags = ['ruby', 'rails2']
 
 # Additional fields which are included into each log event that
 # originates from a captured request.
-# Can either be a Hash or an object which responds to to_proc which
-# subsequently returns a Hash. If it is the latter, the proc will be exceuted
-# similar to an after filter in every request of the controller and thus has
-# access to the controller state after the request was handled.
-config.rackstash.request_fields = lambda do |controller|
+# Can either be a Hash or a callable object which responds to #call and which
+# subsequently returns a Hash. If it is the latter, the object will called
+# with the `request` object after the request is handled.
+config.rackstash.request_fields = lambda { |request|
   {
     :host => request.host,
     :source_ip => request.remote_ip,
     :user_agent => request.user_agent
   }
-end
+}
 
 # Additional fields that are to be included into every emitted log, both
 # buffered and not. You can use this to add global state information to the
 # log, e.g. from the current thread or from the current environment.
-# Similar to the request_fields, this can be either a static Hash or an
-# object which responds to to_proc and returns a Hash there.
+# Similar to the request_fields, this can be either a static Hash or a
+# callable object which responds to #call and returns a Hash.
 #
 # Note that the proc is not executed in a controller instance and thus doesn't
 # directly have access to the controller state.

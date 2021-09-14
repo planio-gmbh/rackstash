@@ -14,6 +14,8 @@ module Rackstash
 
       Rails.logger.fields.reverse_merge!(data)
       Rails.logger.fields.merge! request_fields(payload)
+
+      Rails.logger.tags.push *request_tags(payload)
     end
 
     def redirect_to(event)
@@ -98,6 +100,10 @@ module Rackstash
       end
     end
 
+    def request_tags(payload)
+      payload[:rackstash_request_tags] || []
+    end
+
     def request_fields(payload)
       payload[:rackstash_request_fields] || {}
     end
@@ -108,6 +114,7 @@ module Rackstash
 
     def append_info_to_payload(payload)
       super
+      payload[:rackstash_request_tags] = Rackstash.request_tags(self)
       payload[:rackstash_request_fields] = Rackstash.request_fields(self)
     end
   end
