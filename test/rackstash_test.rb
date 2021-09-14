@@ -50,9 +50,7 @@ describe Rackstash do
     end
 
     let(:controller) do
-      controller = Class.new(Object){attr_accessor :status}.new
-      controller.status = "running"
-      controller
+      Struct.new(:request).new(Struct.new(:status).new(200))
     end
 
     it "won't be included in unbuffered mode" do
@@ -72,31 +70,29 @@ describe Rackstash do
     end
 
     it "can be defined as a proc" do
-      Rackstash.request_fields = proc do |controller|
+      Rackstash.request_fields = proc do |request|
         {
           :foo => :bar,
-          :status => @status,
-          :instance_status => controller.status
+          :status => request.status
         }
       end
 
       Rackstash.request_fields(controller).must_be_instance_of HashWithIndifferentAccess
-      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => "running", "instance_status" => "running"})
+      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => 200})
 
       # TODO: fake a real request and ensure that the field gets set in the log output
     end
 
     it "can be defined as a lambda" do
-      Rackstash.request_fields = lambda do |controller|
+      Rackstash.request_fields = lambda do |request|
         {
           :foo => :bar,
-          :status => @status,
-          :instance_status => controller.status
+          :status => request.status
         }
       end
 
       Rackstash.request_fields(controller).must_be_instance_of HashWithIndifferentAccess
-      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => "running", "instance_status" => "running"})
+      Rackstash.request_fields(controller).must_equal({"foo" => :bar, "status" => 200})
 
       # TODO: fake a real request and ensure that the field gets set in the log output
     end
