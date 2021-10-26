@@ -24,7 +24,7 @@ module Rackstash
   mattr_writer :request_fields
   self.request_fields = HashWithIndifferentAccess.new
   def self.request_fields(controller)
-    if @@request_fields.respond_to?(:to_proc)
+    if !@@request_fields.is_a?(Hash) && @@request_fields.respond_to?(:to_proc)
       ret = controller.instance_eval(&@@request_fields)
     else
       ret = @@request_fields
@@ -42,7 +42,7 @@ module Rackstash
   mattr_writer :fields
   self.fields = HashWithIndifferentAccess.new
   def self.fields
-    if @@fields.respond_to?(:to_proc)
+    if !@@fields.is_a?(Hash) and @@fields.respond_to?(:to_proc)
       ret = @@fields.to_proc.call
     else
       ret = @@fields
