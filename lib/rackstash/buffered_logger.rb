@@ -37,6 +37,7 @@ module Rackstash
       # logger using +flush_and_pop_buffer+. This will not flush the underlying
       # logger. If this is required, you still need to call
       # +BufferedLogger#logger.flush+
+      # TODO is that still true? 
 
       # broken for unknown reasons with Rails5 / Ruby 2.7
       #delegate_if_required :@logger, :flush, :auto_flushing, :auto_flushing=
@@ -47,8 +48,6 @@ module Rackstash
     attr_accessor :formatter
     attr_reader :logger
     def_delegators :@logger, :level, :level=
-
-    def_delegators :@logger, :flush, :auto_flushing, :auto_flushing=
     def_delegators :@logger, :progname, :progname=
     def_delegators :@logger, :silencer, :silencer= , :silence
 
