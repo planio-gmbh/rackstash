@@ -28,25 +28,15 @@ describe Rackstash::BufferedLogger do
   end
 
   describe "when passing a logger" do
-    it "delegates only defined methods" do
+    it "delegates methods if defined" do
       # sanity
       base_logger.wont_respond_to :flush
-      base_logger.wont_respond_to :auto_flushing
+      subject.flush.must_equal nil
 
-      base_logger.instance_eval{ def flush; end }
+      base_logger.instance_eval{ def flush; 'okay'; end }
 
       base_logger.must_respond_to :flush
-      base_logger.wont_respond_to :auto_flushing
-      subject.must_respond_to :flush
-      subject.wont_respond_to :auto_flushing
-    end
-
-    it "delegates later methods too" do
-      base_logger.wont_respond_to :auto_flushing # sanity
-      base_logger.instance_eval{ def auto_flushing; end }
-
-      base_logger.must_respond_to :auto_flushing
-      subject.must_respond_to :auto_flushing
+      subject.flush.must_equal 'okay'
     end
   end
 

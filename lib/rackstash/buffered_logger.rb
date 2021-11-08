@@ -32,19 +32,12 @@ module Rackstash
       @buffer = {}
 
       @source_is_customized = false
-
-      # Note: Buffered logs need to be explicitly flushed to the underlying
-      # logger using +flush_and_pop_buffer+. This will not flush the underlying
-      # logger. If this is required, you still need to call
-      # +BufferedLogger#logger.flush+
-      delegate_if_required :@logger, :flush, :auto_flushing, :auto_flushing=
-      delegate_if_required :@logger, :progname, :progname=
-      delegate_if_required :@logger, :silencer, :silencer=, :silence
     end
 
     attr_accessor :formatter
     attr_reader :logger
     def_delegators :@logger, :level, :level=
+    def_delegators :@logger, :progname, :progname=
 
     def add(severity, message=nil, progname=nil)
       severity ||= UNKNOWN
@@ -172,17 +165,43 @@ module Rackstash
       buffer[:do_not_log] = !!yes_or_no
     end
 
-  protected
-    def delegate_if_required(object_name, *methods)
-      object = instance_variable_get(object_name)
-      methods = Array(methods).select{|method| object.respond_to? method}
+    def progname
+      @logger.progname if @logger.respond_to?(:progname)
+    end
 
-      metaclass = class << self; self; end
-      methods.each do |method|
-        metaclass.instance_eval{ def_delegator object, method }
+    def progname=(name)
+      @logger.progname = name if @logger.respond_to?(:progname=)
+    end
+
+    def silencer
+      @logger.silencer if @logger.respond_to?(:silencer)
+    end
+
+    def silencer=(name)
+      @logger.silencer = name if @logger.respond_to?(:silencer=)
+    end
+
+    def silence(*args, &block)
+      if @logger.respond_to?(:silence)
+        @logger.silence(*args, &block)
+      else
+        yield self
       end
     end
 
+    def flush
+      @logger.flush if @logger.respond_to?(:flush)
+    end
+
+    def auto_flushing
+      @logger.auto_flushing if logger.respond_to?(:auto_flushing)
+    end
+
+    def auto_flushing=(value)
+      @logger.auto_flushing = value if logger.respond_to?(:auto_flushing=)
+    end
+
+  protected
     def default_fields
       HashWithIndifferentAccess.new({"log_id" => uuid, "pid" => Process.pid})
     end
