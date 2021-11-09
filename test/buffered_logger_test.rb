@@ -139,6 +139,14 @@ describe Rackstash::BufferedLogger do
       json["@message"].must_equal "   [INFO] Hello"
     end
 
+    it "can set additional tags for the duration of a block" do
+      subject.tagged("foo", "bar") { subject.info "Testing" }
+      json["@tags"].must_equal ["foo", "bar"]
+
+      subject.info "Testing"
+      json["@tags"].must_equal []
+    end
+
     it "can set additional fields" do
       subject.with_buffer do
         subject.fields[:foo] = :bar

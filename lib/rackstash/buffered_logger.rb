@@ -113,6 +113,10 @@ module Rackstash
       buffer && buffer[:tags]
     end
 
+    def tagged(*tags)
+      Rackstash.tagged(*tags) { yield }
+    end
+
     def source=(value)
       @source = value
       @source_is_customized = true
