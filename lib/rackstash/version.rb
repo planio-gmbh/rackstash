@@ -1,3 +1,3 @@
 module Rackstash
-  VERSION = "0.3.0.basecamp"
+  VERSION = "0.3.1.basecamp"
 end
