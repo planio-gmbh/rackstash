@@ -31,6 +31,8 @@ module Rackstash
         exception_wrapper = ActionDispatch::ExceptionWrapper.new(backtrace_cleaner, exception)
       end
       data = {
+        :error => exception.class.name,
+        :error_message => exception.message,
         :error_backtrace => exception_wrapper.full_trace.join("\n")
       }
       Rails.logger.fields.reverse_merge!(data)
