@@ -183,7 +183,7 @@ module Rackstash
 
       metaclass = class << self; self; end
       methods.each do |method|
-        metaclass.instance_eval{ def_delegator object, method }
+        metaclass.instance_eval{ def_delegator object_name, method }
       end
     end
 
