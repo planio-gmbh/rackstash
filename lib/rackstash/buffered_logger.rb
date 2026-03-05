@@ -241,17 +241,48 @@ module Rackstash
       end
     end
 
+    TRUNCATION_MARKER = "\n\n... (truncated) ...\n\n".freeze
+
+    def format_log_line(line)
+      msg = line[:message].to_s.gsub(/[\n\r]/, "\n")
+      msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
+      msg = "[#{Severities[line[:severity]]}] ".rjust(10) + msg
+      msg.encode!(Encoding::UTF_8, :invalid => :replace, :undef => :replace) if msg.respond_to?(:encode!)
+      msg
+    end
+
     def normalized_message(logs=[])
-      logs.map do |line|
-        # normalize newlines
-        msg = line[:message].to_s.gsub(/[\n\r]/, "\n")
-        # remove any leading newlines and a single trailing newline
-        msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
-        msg = "[#{Severities[line[:severity]]}] ".rjust(10) + msg
-        # Normalize the log line to UTF-8
-        msg.encode!(Encoding::UTF_8, :invalid => :replace, :undef => :replace) if msg.respond_to?(:encode!)
-        msg
-      end.join("\n")
+      message = logs.map { |log| format_log_line(log) }.join("\n")
+
+      max_bytesize = Rackstash.max_message_bytesize
+      return message unless max_bytesize && max_bytesize > 0 && message.bytesize > max_bytesize
+
+      if max_bytesize <= TRUNCATION_MARKER.bytesize
+        return keep_head_bytes(message, max_bytesize)
+      end
+
+      usable = max_bytesize - TRUNCATION_MARKER.bytesize
+      head = keep_head_bytes(message, usable / 2)
+      tail = keep_tail_bytes(message, usable / 2)
+      head + TRUNCATION_MARKER + tail
+    end
+
+    def keep_head_bytes(str, max)
+      return str if str.bytesize <= max
+      pos = max
+      pos -= 1 while pos > 0 && utf8_continuation_byte?(str.getbyte(pos))
+      str.byteslice(0, pos)
+    end
+
+    def keep_tail_bytes(str, max)
+      return str if str.bytesize <= max
+      pos = str.bytesize - max
+      pos += 1 while pos < str.bytesize && utf8_continuation_byte?(str.getbyte(pos))
+      str.byteslice(pos, str.bytesize - pos)
+    end
+
+    def utf8_continuation_byte?(byte)
+      byte && (byte & 0xC0) == 0x80
     end
 
     def logstash_event(logs=[], fields=default_fields, tags=[])

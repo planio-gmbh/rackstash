@@ -14,6 +14,11 @@ module Rackstash
   mattr_accessor :log_level
   self.log_level = :info
 
+  # Maximum bytesize of the combined log message. Messages exceeding this limit
+  # will be truncated with head/tail preservation. nil or 0 means no limit.
+  mattr_accessor :max_message_bytesize
+  self.max_message_bytesize = 1_048_576
+
   # Custom fields that will be merged with the log object when we
   # capture a request.
   #
