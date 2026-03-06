@@ -196,4 +196,207 @@ describe Rackstash::BufferedLogger do
       log_line.must_be :nil?
     end
   end
+
+  describe "message truncation" do
+    before do
+      @old_max_message_bytesize = Rackstash.max_message_bytesize
+    end
+
+    after do
+      Rackstash.max_message_bytesize = @old_max_message_bytesize
+    end
+
+    it "does not truncate when the message is under the limit" do
+      Rackstash.max_message_bytesize = 1_000
+
+      subject.with_buffer do
+        subject.info("Hello")
+        subject.info("World")
+      end
+
+      json["@message"].must_equal "   [INFO] Hello\n   [INFO] World"
+      json["@message"].wont_include "... (truncated) ..."
+    end
+
+    it "truncates the message when it exceeds the limit" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+        20.times { |i| subject.info("Log line number #{i}: #{'x' * 40}") }
+      end
+
+      message = json["@message"]
+      message.bytesize.must_be :<=, 200
+      message.must_include "... (truncated) ..."
+      message.must_match(/Log line number 0/)
+      message.must_match(/Log line number 19/)
+    end
+
+    it "does not truncate when limit is nil" do
+      Rackstash.max_message_bytesize = nil
+
+      subject.with_buffer do
+        20.times { |i| subject.info("Log line number #{i}: #{'x' * 40}") }
+      end
+
+      json["@message"].wont_include "... (truncated) ..."
+    end
+
+    it "does not truncate when limit is 0" do
+      Rackstash.max_message_bytesize = 0
+
+      subject.with_buffer do
+        20.times { |i| subject.info("Log line number #{i}: #{'x' * 40}") }
+      end
+
+      json["@message"].wont_include "... (truncated) ..."
+    end
+
+    it "does not truncate when the message bytesize equals the limit exactly" do
+      Rackstash.max_message_bytesize = 1_000
+
+      subject.with_buffer do
+        subject.info("Hello")
+      end
+
+      # Get the actual bytesize and set the limit to match exactly
+      message = json["@message"]
+      Rackstash.max_message_bytesize = message.bytesize
+
+      subject.with_buffer do
+        subject.info("Hello")
+      end
+
+      json["@message"].must_equal message
+      json["@message"].wont_include "... (truncated) ..."
+    end
+
+    it "handles multi-byte UTF-8 characters without splitting them" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+        10.times { |i| subject.info("Line #{i}: #{'日本語テスト' * 5}") }
+      end
+
+      message = json["@message"]
+      message.must_include "... (truncated) ..."
+      message.bytesize.must_be :<=, 200
+      message.valid_encoding?.must_equal true
+    end
+
+    it "truncates a single long line using byte-level truncation" do
+      Rackstash.max_message_bytesize = 100
+
+      subject.with_buffer do
+        subject.info("x" * 500)
+      end
+
+      message = json["@message"]
+      message.must_include "... (truncated) ..."
+      message.bytesize.must_be :<=, 100
+      message.must_match(/x{5,}/)
+      parts = message.split("... (truncated) ...")
+      parts[0].strip.must_match(/x+\z/)
+      parts[1].strip.must_match(/x+\z/)
+    end
+
+    it "preserves content from both the head and tail" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+        20.times { |i| subject.info("Line #{i}: #{'a' * 30}") }
+      end
+
+      message = json["@message"]
+      message.must_include "... (truncated) ..."
+      message.bytesize.must_be :<=, 200
+      message.must_match(/Line 0/)
+      message.must_match(/Line 19/)
+    end
+
+    it "handles a limit smaller than the truncation marker" do
+      Rackstash.max_message_bytesize = 10
+
+      subject.with_buffer do
+        subject.info("x" * 500)
+      end
+
+      message = json["@message"]
+      message.bytesize.must_be :<=, 10
+      message.bytesize.must_be :>, 0
+      message.wont_include "... (truncated) ..."
+    end
+
+    it "handles a limit at the marker boundary" do
+      marker_size = Rackstash::BufferedLogger::TRUNCATION_MARKER.bytesize
+
+      Rackstash.max_message_bytesize = marker_size
+      subject.with_buffer do
+        subject.info("x" * 500)
+      end
+      json["@message"].bytesize.must_be :<=, marker_size
+      json["@message"].wont_include "... (truncated) ..."
+
+      Rackstash.max_message_bytesize = marker_size + 1
+      subject.with_buffer do
+        subject.info("x" * 500)
+      end
+      json["@message"].bytesize.must_be :<=, marker_size + 1
+      json["@message"].must_include "... (truncated) ..."
+    end
+
+    it "stays within the byte limit for various sizes" do
+      [50, 77, 100, 150].each do |limit|
+        Rackstash.max_message_bytesize = limit
+
+        subject.with_buffer do
+          6.times { |i| subject.info("Line #{i}: #{'a' * 30}") }
+        end
+
+        message = json["@message"]
+        message.must_include "... (truncated) ..."
+        message.bytesize.must_be :<=, limit
+      end
+    end
+
+    it "handles 4-byte UTF-8 characters (emoji) without splitting them" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+        10.times { |i| subject.info("Line #{i}: #{"🎉🔥💯🚀" * 3}") }
+      end
+
+      message = json["@message"]
+      message.must_include "... (truncated) ..."
+      message.bytesize.must_be :<=, 200
+      message.valid_encoding?.must_equal true
+    end
+
+    it "returns an empty message for an empty log buffer" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+      end
+
+      json["@message"].must_equal ""
+      json["@message"].wont_include "... (truncated) ..."
+    end
+
+    it "handles mixed severity levels under truncation" do
+      Rackstash.max_message_bytesize = 200
+
+      subject.with_buffer do
+        subject.debug("debug message: #{'d' * 40}")
+        subject.info("info message: #{'i' * 40}")
+        subject.warn("warn message: #{'w' * 40}")
+        subject.error("error message: #{'e' * 40}")
+        subject.fatal("fatal message: #{'f' * 40}")
+      end
+
+      message = json["@message"]
+      message.must_include "... (truncated) ..."
+      message.bytesize.must_be :<=, 200
+      message.valid_encoding?.must_equal true
+    end
+  end
 end
