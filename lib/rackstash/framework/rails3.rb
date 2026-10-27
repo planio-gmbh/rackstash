@@ -37,7 +37,10 @@ module Rackstash
           exceptions_app.call(env)
         end
 
-        ActionController::Base.send :include, Rackstash::Instrumentation
+        # Runs for ActionController::Base and, since Rails 5, ActionController::API
+        ActiveSupport.on_load(:action_controller) do
+          include Rackstash::Instrumentation
+        end
       end
     end
   end
